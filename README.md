@@ -1,7 +1,6 @@
 # Fullstack Java Project
 
-## Firstname Lastname (Class)
-Change the name and Class in the title above
+## Anton Van Kimmenade (3AONC)
 
 ## Folder structure
 
