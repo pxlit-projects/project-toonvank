@@ -1,7 +1,61 @@
 # Architecture
+![eShopOnContainers Architecture](NewsManagementSystem.png)
+# Class Diagram
+![class diagram](db.png)
+# Overzicht van de Architectuur
 
-:heavy_check_mark:_(COMMENT) Add a description of the architecture of your application and create a diagram like the one below. Link to the diagram in this document._
+## 1\. Client Applicatie
 
-![eShopOnContainers Architecture](NewsManagementSystem.drawio.png)
+-   **Frontend**: De frontend is een webapplicatie gebouwd met Angular en Angular Material. Deze applicatie wordt door de eindgebruikers benaderd om interacties uit te voeren.
+-   **Communicatie met API Gateway**: De frontend communiceert met de API Gateway voor alle backend-functionaliteiten.
 
-[Source](https://docs.microsoft.com/en-us/dotnet/architecture/cloud-native/introduce-eshoponcontainers-reference-app)
+## 2\. API Gateway
+
+-   **Functie**: De API Gateway is de centrale toegangspoort voor de frontend om met de backend microservices te communiceren. Het zorgt voor het routeren van verzoeken.
+-   **Logback Logging**: Logback is geïntegreerd in de API Gateway voor gecentraliseerde logging, wat helpt bij het monitoren en debuggen van de applicatie.
+
+## 3\. Microservices
+
+### Belangrijkste Services:
+
+-   **Comment Service**: Beheert het toevoegen en beheren van reacties.
+-   **Post Service**: Beheert het posten van berichten.
+-   **Review Service**: Beheert reviews en beoordelingen.
+
+### Kenmerken van de Microservices:
+
+-   **Synchronous Communication**: Alle microservices hebben een synchrone communicatie onderling, wat betekent dat ze direct gegevens uitwisselen wanneer er een verzoek wordt verzonden.
+-   **Asynchronous Communication via RabbitMQ**: Bepaalde taken worden asynchroon uitgevoerd via RabbitMQ, een berichtensysteem.
+
+## 4\. Service Discovery en Configuratie
+
+-   **Eureka Discovery Service**: Deze service houdt een lijst bij van beschikbare microservices en helpt bij het automatisch ontdekken van services binnen de infrastructuur.
+-   **Config Server**: Beheert de configuraties van alle microservices centraal, wat versiebeheer en beheer van instellingen vergemakkelijkt.
+
+## 5\. Cloud Services
+
+-   **RabbitMQ Queue**: Wordt gebruikt voor asynchrone berichtenuitwisseling tussen de microservices. Dit zorgt voor losgekoppelde communicatie. Voor asynchrone communicatie, bijvoorbeeld om notificaties (zoals bij US8) te sturen zonder dat de services direct afhankelijk van elkaar zijn.
+-   **Open-Feign**: Voor het opzetten van REST-communicatie tussen de services.
+-   **SonarQube**: SonarQube is geïntegreerd om de codekwaliteit en security vulnerabilities van de backend-code te analyseren en monitoren.
+
+# Link met User Stories
+
+### 1\. PostService
+
+-   **US1**: Redacteuren kunnen posts aanmaken.
+-   **US2**: Posts kunnen als concept worden opgeslagen.
+-   **US3**: Redacteuren kunnen posts bewerken.
+-   **US4**: Gebruikers zien een overzicht van gepubliceerde posts.
+-   **US5**: Posts zijn te filteren op inhoud, auteur en categorie.
+
+### 2\. ReviewService
+
+-   **US7**: Hoofdredacteur kan posts goedkeuren of afwijzen.
+-   **US8**: Redacteuren ontvangen meldingen bij goedkeuring of afwijzing.
+-   **US9**: Redacteuren kunnen feedback geven bij afwijzing.
+
+### 3\. CommentService
+
+-   **US10**: Gebruikers kunnen reageren op posts.
+-   **US11**: Gebruikers kunnen reacties van anderen lezen.
+-   **US12**: Gebruikers kunnen hun eigen reacties bewerken of verwijderen.
