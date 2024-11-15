@@ -34,7 +34,7 @@
 
 ## 5\. Cloud Services
 
--   **RabbitMQ Queue**: Wordt gebruikt voor asynchrone berichtenuitwisseling tussen de microservices. Dit zorgt voor losgekoppelde communicatie. Voor asynchrone communicatie, bijvoorbeeld om notificaties (zoals bij US8) te sturen zonder dat de services direct afhankelijk van elkaar zijn.
+-   **RabbitMQ Queue**: Wordt gebruikt voor asynchrone berichtenuitwisseling tussen de microservices. Dit zorgt voor losgekoppelde communicatie. Voor asynchrone communicatie, bijvoorbeeld om notificaties (zoals bij US8) te sturen zonder dat de services direct afhankelijk van elkaar zijn.Dit betekent dat als bijvoorbeeld de ReviewService een post wil goedkeuren, het informatie over die post kan ophalen van de PostService via OpenFeign. Deze REST-communicatie is nodig omdat de ReviewService en PostService als losse onderdelen in een microservices-architectuur draaien en geen directe toegang hebben tot elkaars data. OpenFeign maakt het eenvoudig om API-aanroepen tussen de services te doen zonder extra complexe code.
 -   **Open-Feign**: Voor het opzetten van REST-communicatie tussen de services.
 -   **SonarQube**: SonarQube is geïntegreerd om de codekwaliteit en security vulnerabilities van de backend-code te analyseren en monitoren.
 
