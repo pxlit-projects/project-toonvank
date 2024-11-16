@@ -2,9 +2,10 @@ package com.pxl.services;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-//TODO Imlement SQL db
 @SpringBootApplication
+@EnableDiscoveryClient
 public class CommentServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(CommentServiceApplication.class, args);
