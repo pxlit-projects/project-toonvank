@@ -1,16 +1,24 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { Article, Comment } from '../models/article.model';
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ArticleService {
   private readonly STORAGE_KEY = 'articles';
+  private endpoint: string = 'http://localhost:8084/api/posts/published';
+  http: HttpClient = inject(HttpClient);
+
   private articles = new BehaviorSubject<Article[]>(this.loadArticles());
 
   private loadArticles(): Article[] {
+    const test = this.http.get<Object[]>(this.endpoint).subscribe(data =>{
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    })
     const stored = localStorage.getItem(this.STORAGE_KEY);
+    console.log(stored)
     if (stored) {
       const articles = JSON.parse(stored);
       return articles.map((article: any) => ({

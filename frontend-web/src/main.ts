@@ -6,6 +6,7 @@ import { ArticleListComponent } from './app/components/article-list/article-list
 import { ArticleEditorComponent } from './app/components/article-editor/article-editor.component';
 import { ReviewQueueComponent } from './app/components/review-queue/review-queue.component';
 import { DraftsComponent } from './app/components/drafts/drafts.component';
+import {provideHttpClient} from "@angular/common/http";
 
 const routes: Routes = [
   { path: '', component: ArticleListComponent },
@@ -37,6 +38,6 @@ export class App {
 
 bootstrapApplication(App, {
   providers: [
-    provideRouter(routes)
+    provideRouter(routes),provideHttpClient(),
   ]
 }).catch(err => console.error(err));
