@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArticleService } from '../../services/article.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Article } from '../../models/article.model';
+import {Article, ArticleDTO} from '../../models/article.model';
 
 @Component({
   selector: 'app-article-editor',
@@ -68,7 +68,7 @@ import { Article } from '../../models/article.model';
   `
 })
 export class ArticleEditorComponent implements OnInit {
-  article: Partial<Article> = {
+  article: Partial<ArticleDTO> = {
     title: '',
     content: '',
     category: 'news'
@@ -106,7 +106,7 @@ export class ArticleEditorComponent implements OnInit {
     } else {
       this.articleService.createArticle({
         ...this.article,
-        authorId: 'current-user-id',
+        author: 'current-user-id',
         status: 'draft'
       });
     }
@@ -124,7 +124,7 @@ export class ArticleEditorComponent implements OnInit {
     } else {
       this.articleService.createArticle({
         ...this.article,
-        authorId: 'current-user-id',
+        author: 'current-user-id',
         status: 'pending'
       });
     }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ArticleService } from '../../services/article.service';
-import { Article } from '../../models/article.model';
+import {Article, ArticleDTO} from '../../models/article.model';
 
 @Component({
   selector: 'app-drafts',
@@ -50,7 +50,7 @@ import { Article } from '../../models/article.model';
   `
 })
 export class DraftsComponent implements OnInit {
-  drafts: Article[] = [];
+  drafts: ArticleDTO[] = [];
 
   constructor(private articleService: ArticleService) {}
 
@@ -64,12 +64,12 @@ export class DraftsComponent implements OnInit {
     });
   }
 
-  submitForReview(id: string) {
+  submitForReview(id: number) {
     this.articleService.submitForReview(id);
     this.loadDrafts();
   }
 
-  deleteDraft(id: string) {
+  deleteDraft(id: number) {
     if (confirm('Are you sure you want to delete this draft?')) {
       this.articleService.deleteArticle(id);
       this.loadDrafts();

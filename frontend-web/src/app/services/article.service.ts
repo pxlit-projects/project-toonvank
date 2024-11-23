@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
-import { Article, Comment } from '../models/article.model';
+import {BehaviorSubject, Observable, map, catchError, throwError, tap} from 'rxjs';
+import {Article, ArticleDTO, Comment} from '../models/article.model';
 import {HttpClient} from "@angular/common/http";
 
 @Injectable({
@@ -9,11 +9,12 @@ import {HttpClient} from "@angular/common/http";
 export class ArticleService {
   private readonly STORAGE_KEY = 'articles';
   private endpoint: string = 'http://localhost:8086/post/api/posts';
+  private postEndpoint: string = 'http://localhost:8086/post/api/posts';
   http: HttpClient = inject(HttpClient);
 
-  private articles = new BehaviorSubject<Article[]>(this.loadArticles());
+  private articles = new BehaviorSubject<ArticleDTO[]>(this.loadArticles());
 
-  private loadArticles(): Article[] {
+  private loadArticles(): ArticleDTO[] {
     this.http.get<Object[]>(this.endpoint).subscribe(data => {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     });
@@ -37,77 +38,87 @@ export class ArticleService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(articles));
   }
 
-  getArticles(): Observable<Article[]> {
+  getArticles(): Observable<ArticleDTO[]> {
     return this.articles.asObservable();
   }
 
-  getPendingArticles(): Observable<Article[]> {
+  getPendingArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
       map(articles => articles.filter(article => article.status === 'pending'))
     );
   }
 
-  getPublishedArticles(): Observable<Article[]> {
+  getPublishedArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
       map(articles => articles.filter(article => article.status === 'published'))
     );
   }
 
-  getDraftArticles(): Observable<Article[]> {
+  getDraftArticles(): Observable<ArticleDTO[]> {
     console.log(this.articles)
     return this.articles.pipe(
       map(articles => articles.filter(article => article.status === 'draft'))
     );
   }
 
-  createArticle(article: Partial<Article>): void {
+  createArticle(article: Partial<Article>): Observable<Article> {
     const newArticle: Article = {
-      id: Date.now().toString(),
       title: article.title || '',
       content: article.content || '',
-      authorId: article.authorId || '',
-      category: article.category || '',
-      status: article.status || 'draft',
+      author: article.author || '',
       createdAt: new Date(),
       updatedAt: new Date(),
-      comments: []
+      status: article.status || 'draft',
+      category: article.category || '',
     };
-    
-    const currentArticles = this.articles.value;
-    const updatedArticles = [...currentArticles, newArticle];
-    this.articles.next(updatedArticles);
-    this.saveArticles(updatedArticles);
+
+    console.log('New article:', newArticle); // Log the new article for debugging
+
+    return this.http.post<Article>(this.endpoint, newArticle)
+        .pipe(
+            tap(savedArticle => {
+              console.log('Saved article:', savedArticle); // Log the saved article for debugging
+              /*const currentArticles = this.articles.value;
+              const updatedArticles = [...currentArticles, savedArticle];
+              this.articles.next(updatedArticles); // Update local state with the saved article
+              this.saveArticles(updatedArticles); // Save the updated articles to local storage*/
+            }),
+            catchError(error => {
+              console.error('Error creating article:', error);
+              throw error; // Re-throw the error for handling in the component
+            })
+        );
   }
 
-  updateArticle(id: string, updates: Partial<Article>): void {
+  updateArticle(id: number, updates: Partial<ArticleDTO>): void {
     const currentArticles = this.articles.value;
-    const updatedArticles = currentArticles.map(article => 
+    const updatedArticles = currentArticles.map(article =>
       article.id === id ? { ...article, ...updates, updatedAt: new Date() } : article
     );
     this.articles.next(updatedArticles);
-    this.saveArticles(updatedArticles);
+    /*this.saveArticles(updatedArticles);*/
   }
 
-  deleteArticle(id: string): void {
+  deleteArticle(id: number): void {
     const currentArticles = this.articles.value;
     const updatedArticles = currentArticles.filter(article => article.id !== id);
     this.articles.next(updatedArticles);
-    this.saveArticles(updatedArticles);
+    /*this.saveArticles(updatedArticles);*/
   }
 
-  submitForReview(id: string): void {
+  submitForReview(id: number): void {
     this.updateArticle(id, { status: 'pending' });
   }
 
-  approveArticle(id: string): void {
+  approveArticle(id: number): void {
     this.updateArticle(id, { status: 'published' });
   }
 
-  rejectArticle(id: string): void {
+  rejectArticle(id: number): void {
     this.updateArticle(id, { status: 'rejected' });
   }
 
-  addComment(articleId: string, commentData: { content: string; authorId: string }): void {
+  addComment(articleId: number, commentData: { content: string; authorId: string }): void {
     const article = this.articles.value.find(a => a.id === articleId);
     if (article) {
       const newComment: Comment = {
@@ -117,9 +128,21 @@ export class ArticleService {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      this.updateArticle(articleId, {
+      /*this.updateArticle(articleId, {
         comments: [...article.comments, newComment]
-      });
+      });*/
     }
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error('Error in', operation, ':', error);
+
+
+      // Handle specific errors if needed (e.g., authentication, validation)
+
+      // Return a user-friendly error message or a default value
+      return throwError(() => new Error('An error occurred. Please try again later.'));
+    };
   }
 }

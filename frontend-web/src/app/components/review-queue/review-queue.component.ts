@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArticleService } from '../../services/article.service';
-import { Article } from '../../models/article.model';
+import {Article, ArticleDTO} from '../../models/article.model';
 
 @Component({
   selector: 'app-review-queue',
@@ -42,7 +42,7 @@ import { Article } from '../../models/article.model';
   `
 })
 export class ReviewQueueComponent implements OnInit {
-  pendingArticles: Article[] = [];
+  pendingArticles: ArticleDTO[] = [];
 
   constructor(private articleService: ArticleService) {}
 
@@ -53,11 +53,11 @@ export class ReviewQueueComponent implements OnInit {
     });
   }
 
-  approveArticle(id: string) {
+  approveArticle(id: number) {
     this.articleService.approveArticle(id);
   }
 
-  rejectArticle(id: string) {
+  rejectArticle(id: number) {
     this.articleService.rejectArticle(id);
   }
 }

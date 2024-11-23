@@ -1,13 +1,22 @@
 export interface Article {
-  id: string;
   title: string;
   content: string;
-  authorId: string;
-  category: string;
-  status: 'draft' | 'pending' | 'published' | 'rejected';
+  author: string;
   createdAt: Date;
   updatedAt: Date;
-  comments: Comment[];
+  status: 'draft' | 'pending' | 'published' | 'rejected';
+  category: string;
+}
+
+export interface ArticleDTO {
+  id: number;
+  title: string;
+  content: string;
+  author: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: 'draft' | 'pending' | 'published' | 'rejected';
+  category: string;
 }
 
 export interface Comment {

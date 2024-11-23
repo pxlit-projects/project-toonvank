@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArticleService } from '../../services/article.service';
-import { Article } from '../../models/article.model';
+import {Article, ArticleDTO} from '../../models/article.model';
 
 @Component({
   selector: 'app-article-list',
@@ -48,12 +48,13 @@ import { Article } from '../../models/article.model';
             <p class="text-sm text-gray-500 mt-2">Last updated: {{ article.updatedAt | date:'medium' }}</p>
             <div class="mt-4">
               <h3 class="font-bold">Comments</h3>
-              @for (comment of article.comments; track comment.id) {
+              <p>Not implemented, check commented code</p>
+              <!--@for (comment of article.comments; track comment.id) {
                 <div class="ml-4 mt-2 p-2 bg-gray-50 rounded">
                   <p>{{ comment.content }}</p>
                   <p class="text-sm text-gray-500">{{ comment.createdAt | date:'medium' }}</p>
                 </div>
-              }
+              }-->
             </div>
           </div>
         }
@@ -62,7 +63,7 @@ import { Article } from '../../models/article.model';
   `
 })
 export class ArticleListComponent implements OnInit {
-  articles: Article[] = [];
+  articles: ArticleDTO[] = [];
   searchTerm = '';
   selectedCategory = '';
   viewMode: 'published' | 'drafts' = 'published';
@@ -85,7 +86,7 @@ export class ArticleListComponent implements OnInit {
     }
   }
 
-  get filteredArticles(): Article[] {
+  get filteredArticles(): ArticleDTO[] {
     return this.articles.filter(article => {
       const matchesSearch = article.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
                           article.content.toLowerCase().includes(this.searchTerm.toLowerCase());

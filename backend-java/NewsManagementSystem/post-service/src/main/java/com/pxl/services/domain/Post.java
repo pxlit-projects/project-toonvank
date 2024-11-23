@@ -26,4 +26,5 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private PostStatus status;
     private String category;
+    //TODO relation to comment
 }
