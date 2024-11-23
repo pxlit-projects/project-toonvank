@@ -8,28 +8,26 @@ import {HttpClient} from "@angular/common/http";
 })
 export class ArticleService {
   private readonly STORAGE_KEY = 'articles';
-  private endpoint: string = 'http://localhost:8084/api/posts/published';
+  private endpoint: string = 'http://localhost:8086/post/api/posts';
   http: HttpClient = inject(HttpClient);
 
   private articles = new BehaviorSubject<Article[]>(this.loadArticles());
 
   private loadArticles(): Article[] {
-    const test = this.http.get<Object[]>(this.endpoint).subscribe(data =>{
+    this.http.get<Object[]>(this.endpoint).subscribe(data => {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-    })
+    });
+
     const stored = localStorage.getItem(this.STORAGE_KEY);
-    console.log(stored)
     if (stored) {
       const articles = JSON.parse(stored);
       return articles.map((article: any) => ({
         ...article,
-        createdAt: new Date(article.createdAt),
-        updatedAt: new Date(article.updatedAt),
-        comments: article.comments.map((comment: any) => ({
-          ...comment,
-          createdAt: new Date(comment.createdAt),
-          updatedAt: new Date(comment.updatedAt)
-        }))
+        id: String(article.id),
+        createdAt: article.createdAt ? new Date(article.createdAt) : null,
+        updatedAt: article.updatedAt ? new Date(article.updatedAt) : null,
+        status: article.status.toLowerCase(),
+        comments: Array.isArray(article.comments) ? article.comments : []
       }));
     }
     return [];
@@ -56,6 +54,7 @@ export class ArticleService {
   }
 
   getDraftArticles(): Observable<Article[]> {
+    console.log(this.articles)
     return this.articles.pipe(
       map(articles => articles.filter(article => article.status === 'draft'))
     );

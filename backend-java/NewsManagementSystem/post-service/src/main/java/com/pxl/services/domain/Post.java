@@ -23,6 +23,7 @@ public class Post {
     private String author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Enumerated(EnumType.STRING)
     private PostStatus status;
     private String category;
 }

@@ -60,9 +60,9 @@ public class PostService {
         }
     }
 
-    public List<Post> getPublishedPosts() {
+    public List<Post> getPosts() {
         try {
-            return postRepository.findByStatus(PostStatus.PUBLISHED);
+            return postRepository.findAll();
         } catch (Exception e) {
             throw new PostPublishException("Failed to retrieve published posts: " + e.getMessage());
         }

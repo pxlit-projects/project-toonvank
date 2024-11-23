@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "http://localhost:4200")
 public class PostController {
 
     private final PostService postService;
@@ -42,9 +41,9 @@ public class PostController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/published")
-    public List<Post> getPublishedPosts() {
-        return postService.getPublishedPosts();
+    @GetMapping
+    public List<Post> getPosts() {
+        return postService.getPosts();
     }
 
     @GetMapping("/search")

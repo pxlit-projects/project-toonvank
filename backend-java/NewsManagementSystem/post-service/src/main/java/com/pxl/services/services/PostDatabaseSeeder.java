@@ -32,7 +32,7 @@ public class PostDatabaseSeeder {
             post2.setContent("Learn about advanced security concepts in Spring.");
             post2.setAuthor("Jane Smith");
             post2.setCategory("Security");
-            post2.setStatus(PostStatus.DRAFT);
+            post2.setStatus(PostStatus.PUBLISHED);
             post2.setCreatedAt(LocalDateTime.now());
 
             postRepository.save(post1);
