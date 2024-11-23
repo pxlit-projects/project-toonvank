@@ -74,21 +74,18 @@ export class ArticleService {
 
     console.log('New article:', newArticle); // Log the new article for debugging
 
-    return this.http.post<Article>(this.endpoint, newArticle)
-        .pipe(
-            tap(savedArticle => {
-              console.log('Saved article:', savedArticle); // Log the saved article for debugging
-              /*const currentArticles = this.articles.value;
-              const updatedArticles = [...currentArticles, savedArticle];
-              this.articles.next(updatedArticles); // Update local state with the saved article
-              this.saveArticles(updatedArticles); // Save the updated articles to local storage*/
-            }),
-            catchError(error => {
-              console.error('Error creating article:', error);
-              throw error; // Re-throw the error for handling in the component
-            })
-        );
+    return this.http.post<Article>(this.postEndpoint, newArticle).pipe(
+        tap(savedArticle => {
+          console.log('Saved article:', savedArticle); // Log the saved article for debugging
+          // Optional: Update local state here if needed
+        }),
+        catchError(error => {
+          console.error('Error creating article:', error);
+          throw error; // Re-throw the error for handling in the component
+        })
+    );
   }
+
 
   updateArticle(id: number, updates: Partial<ArticleDTO>): void {
     const currentArticles = this.articles.value;

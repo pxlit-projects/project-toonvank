@@ -1,5 +1,6 @@
 package com.pxl.services.controller;
 
+import com.pxl.services.domain.DTO.PostDTO;
 import com.pxl.services.domain.Post;
 import com.pxl.services.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
+    public ResponseEntity<Post> createPost(@RequestBody PostDTO post) {
         Post savedPost = postService.createPost(post);
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }

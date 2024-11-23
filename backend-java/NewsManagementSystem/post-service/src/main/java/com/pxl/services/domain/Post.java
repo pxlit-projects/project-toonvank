@@ -1,10 +1,7 @@
 package com.pxl.services.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,17 +11,25 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NonNull
     private String title;
+    @NonNull
     private String content;
+    @NonNull
     private String author;
+    @NonNull
     private LocalDateTime createdAt;
+    @NonNull
     private LocalDateTime updatedAt;
+    @NonNull
     @Enumerated(EnumType.STRING)
     private PostStatus status;
+    @NonNull
     private String category;
     //TODO relation to comment
 }

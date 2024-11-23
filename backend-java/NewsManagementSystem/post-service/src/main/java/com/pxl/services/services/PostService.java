@@ -1,7 +1,9 @@
 package com.pxl.services.services;
 
+import com.pxl.services.domain.DTO.PostDTO;
 import com.pxl.services.domain.Post;
 import com.pxl.services.domain.PostStatus;
+import com.pxl.services.domain.mapper.PostMapper;
 import com.pxl.services.exceptions.*;
 import com.pxl.services.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +17,17 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
-    public Post createPost(Post post) {
+    public Post createPost(PostDTO postDTO) {
         try {
-            post.setStatus(PostStatus.DRAFT);
-            post.setCreatedAt(LocalDateTime.now());
+            Post post = postMapper.toPost(postDTO);
             return postRepository.save(post);
         } catch (Exception e) {
             throw new PostCreationException("Failed to create posts: " + e.getMessage());
@@ -51,7 +54,7 @@ public class PostService {
         try {
             return postRepository.findById(id)
                     .map(post -> {
-                        post.setStatus(PostStatus.PUBLISHED);
+                        post.setStatus(PostStatus.published);
                         post.setUpdatedAt(LocalDateTime.now());
                         return postRepository.save(post);
                     });

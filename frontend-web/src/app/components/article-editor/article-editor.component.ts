@@ -108,7 +108,7 @@ export class ArticleEditorComponent implements OnInit {
         ...this.article,
         author: 'current-user-id',
         status: 'draft'
-      });
+      }).subscribe(()=>console.log("fuck angular"));
     }
     this.router.navigate(['/drafts']);
   }
