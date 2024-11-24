@@ -24,7 +24,7 @@ public class PostDatabaseSeeder {
             post1.setContent("This is a beginner's guide to Spring Boot.");
             post1.setAuthor("John Doe");
             post1.setCategory("Tutorial");
-            post1.setStatus(PostStatus.published);
+            post1.setStatus(PostStatus.PUBLISHED);
             post1.setCreatedAt(LocalDateTime.now());
 
             Post post2 = new Post();
@@ -32,7 +32,7 @@ public class PostDatabaseSeeder {
             post2.setContent("Learn about advanced security concepts in Spring.");
             post2.setAuthor("Jane Smith");
             post2.setCategory("Security");
-            post2.setStatus(PostStatus.published);
+            post2.setStatus(PostStatus.PUBLISHED);
             post2.setCreatedAt(LocalDateTime.now());
 
             postRepository.save(post1);

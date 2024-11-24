@@ -27,7 +27,7 @@ export class ArticleService {
         id: String(article.id),
         createdAt: article.createdAt ? new Date(article.createdAt) : null,
         updatedAt: article.updatedAt ? new Date(article.updatedAt) : null,
-        status: article.status.toLowerCase(),
+        status: article.status,
         comments: Array.isArray(article.comments) ? article.comments : []
       }));
     }
@@ -44,20 +44,20 @@ export class ArticleService {
 
   getPendingArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
-      map(articles => articles.filter(article => article.status === 'pending'))
+      map(articles => articles.filter(article => article.status === 'PENDING'))
     );
   }
 
   getPublishedArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
-      map(articles => articles.filter(article => article.status === 'published'))
+      map(articles => articles.filter(article => article.status === 'PUBLISHED'))
     );
   }
 
   getDraftArticles(): Observable<ArticleDTO[]> {
     console.log(this.articles)
     return this.articles.pipe(
-      map(articles => articles.filter(article => article.status === 'draft'))
+      map(articles => articles.filter(article => article.status === 'DRAFT'))
     );
   }
 
@@ -68,7 +68,7 @@ export class ArticleService {
       author: article.author || '',
       createdAt: new Date(),
       updatedAt: new Date(),
-      status: article.status || 'draft',
+      status: article.status || 'DRAFT',
       category: article.category || '',
     };
 
@@ -104,15 +104,15 @@ export class ArticleService {
   }
 
   submitForReview(id: number): void {
-    this.updateArticle(id, { status: 'pending' });
+    this.updateArticle(id, { status: 'PENDING' });
   }
 
   approveArticle(id: number): void {
-    this.updateArticle(id, { status: 'published' });
+    this.updateArticle(id, { status: 'PUBLISHED' });
   }
 
   rejectArticle(id: number): void {
-    this.updateArticle(id, { status: 'rejected' });
+    this.updateArticle(id, { status: 'REJECTED' });
   }
 
   addComment(articleId: number, commentData: { content: string; authorId: string }): void {

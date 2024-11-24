@@ -4,7 +4,7 @@ export interface Article {
   author: string;
   createdAt: Date;
   updatedAt: Date;
-  status: 'draft' | 'pending' | 'published' | 'rejected';
+  status: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
   category: string;
 }
 
@@ -15,7 +15,7 @@ export interface ArticleDTO {
   author: string;
   createdAt: Date;
   updatedAt: Date;
-  status: 'draft' | 'pending' | 'published' | 'rejected';
+  status: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'REJECTED';
   category: string;
 }
 

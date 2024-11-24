@@ -101,13 +101,13 @@ export class ArticleEditorComponent implements OnInit {
     if (this.isEditing && this.article.id) {
       this.articleService.updateArticle(this.article.id, {
         ...this.article,
-        status: 'draft'
+        status: 'DRAFT'
       });
     } else {
       this.articleService.createArticle({
         ...this.article,
         author: 'current-user-id',
-        status: 'draft'
+        status: 'DRAFT'
       }).subscribe(()=>console.log("fuck angular"));
     }
     this.router.navigate(['/drafts']);
@@ -119,13 +119,13 @@ export class ArticleEditorComponent implements OnInit {
     if (this.isEditing && this.article.id) {
       this.articleService.updateArticle(this.article.id, {
         ...this.article,
-        status: 'pending'
+        status: 'DRAFT'
       });
     } else {
       this.articleService.createArticle({
         ...this.article,
         author: 'current-user-id',
-        status: 'pending'
+        status: 'DRAFT'
       });
     }
     this.router.navigate(['/']);

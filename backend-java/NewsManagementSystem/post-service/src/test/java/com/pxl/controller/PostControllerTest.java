@@ -31,7 +31,7 @@ class PostControllerTest {
 
     @BeforeEach
     void setUp() {
-        post = new Post(1L, "Test Title", "Test Content", "Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.draft, "Category");
+        post = new Post(1L, "Test Title", "Test Content", "Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Category");
     }
 
     @Test
@@ -47,7 +47,7 @@ class PostControllerTest {
 
     @Test
     void updatePost_ShouldReturnUpdatedPost() {
-        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.draft, "Updated Category");
+        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Updated Category");
         when(postService.updatePost(1L, updatedPost)).thenReturn(Optional.of(updatedPost));
 
         ResponseEntity<Post> response = postController.updatePost(1L, updatedPost);
@@ -59,7 +59,7 @@ class PostControllerTest {
 
     @Test
     void updatePost_ShouldReturnNotFound_WhenPostDoesNotExist() {
-        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.draft, "Updated Category");
+        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Updated Category");
         when(postService.updatePost(1L, updatedPost)).thenReturn(Optional.empty());
 
         ResponseEntity<Post> response = postController.updatePost(1L, updatedPost);
@@ -69,7 +69,7 @@ class PostControllerTest {
     }
 
     @Test
-    void publishPost_ShouldReturnpublishedPost() {
+    void publishPost_ShouldReturnPUBLISHEDPost() {
         when(postService.publishPost(1L)).thenReturn(Optional.of(post));
 
         ResponseEntity<Post> response = postController.publishPost(1L);

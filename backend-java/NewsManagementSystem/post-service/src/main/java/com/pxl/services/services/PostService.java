@@ -54,7 +54,7 @@ public class PostService {
         try {
             return postRepository.findById(id)
                     .map(post -> {
-                        post.setStatus(PostStatus.published);
+                        post.setStatus(PostStatus.PUBLISHED);
                         post.setUpdatedAt(LocalDateTime.now());
                         return postRepository.save(post);
                     });
@@ -65,9 +65,10 @@ public class PostService {
 
     public List<Post> getPosts() {
         try {
+            var result = postRepository.findAll();
             return postRepository.findAll();
         } catch (Exception e) {
-            throw new PostPublishException("Failed to retrieve published posts: " + e.getMessage());
+            throw new PostPublishException("Failed to retrieve PUBLISHED posts: " + e.getMessage());
         }
     }
 
