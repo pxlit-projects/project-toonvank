@@ -70,23 +70,23 @@ class PostControllerTest {
 
     @Test
     void publishPost_ShouldReturnPUBLISHEDPost() {
-        when(postService.publishPost(1L)).thenReturn(Optional.of(post));
+        when(postService.updateStatus(1L)).thenReturn(Optional.of(post));
 
         ResponseEntity<Post> response = postController.publishPost(1L);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(post, response.getBody());
-        verify(postService, times(1)).publishPost(1L);
+        verify(postService, times(1)).updateStatus(1L);
     }
 
     @Test
     void publishPost_ShouldReturnNotFound_WhenPostDoesNotExist() {
-        when(postService.publishPost(1L)).thenReturn(Optional.empty());
+        when(postService.updateStatus(1L)).thenReturn(Optional.empty());
 
         ResponseEntity<Post> response = postController.publishPost(1L);
 
         assertEquals(404, response.getStatusCodeValue());
-        verify(postService, times(1)).publishPost(1L);
+        verify(postService, times(1)).updateStatus(1L);
     }
 
     @Test

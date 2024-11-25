@@ -76,43 +76,73 @@ export class ArticleService {
 
     return this.http.post<Article>(this.postEndpoint, newArticle).pipe(
         tap(savedArticle => {
-          console.log('Saved article:', savedArticle); // Log the saved article for debugging
-          // Optional: Update local state here if needed
+          console.log('Saved article:', savedArticle);
         }),
         catchError(error => {
           console.error('Error creating article:', error);
-          throw error; // Re-throw the error for handling in the component
+          throw error;
         })
     );
   }
 
-
-  updateArticle(id: number, updates: Partial<ArticleDTO>): void {
-    const currentArticles = this.articles.value;
-    const updatedArticles = currentArticles.map(article =>
-      article.id === id ? { ...article, ...updates, updatedAt: new Date() } : article
-    );
-    this.articles.next(updatedArticles);
-    /*this.saveArticles(updatedArticles);*/
+  updateArticle(id: number, updatedArticle: Partial<ArticleDTO>): void {
+    this.http.put<Article>(`${this.postEndpoint}/${updatedArticle.id}`, updatedArticle).pipe(
+        tap(savedArticle => {
+          console.log('Saved article:', savedArticle);
+        }),
+        catchError(error => {
+          console.error('Error creating article:', error);
+          throw error;
+        })
+    ).subscribe();
   }
 
   deleteArticle(id: number): void {
-    const currentArticles = this.articles.value;
-    const updatedArticles = currentArticles.filter(article => article.id !== id);
-    this.articles.next(updatedArticles);
-    /*this.saveArticles(updatedArticles);*/
+    this.http.delete<Article>(`${this.postEndpoint}/${id}`).pipe(
+        tap(savedArticle => {
+          console.log('Deleted article:');
+        }),
+        catchError(error => {
+          console.error('Error deleting article:', error);
+          throw error;
+        })
+    ).subscribe();
   }
 
   submitForReview(id: number): void {
-    this.updateArticle(id, { status: 'PENDING' });
+    this.http.put<Article>(`${this.postEndpoint}/${id}/updateStatus`,"PENDING").pipe(
+        tap(savedArticle => {
+          console.log('Updated status:',savedArticle.status);
+        }),
+        catchError(error => {
+          console.error('Error updating status:', error);
+          throw error;
+        })
+    ).subscribe();
   }
 
   approveArticle(id: number): void {
-    this.updateArticle(id, { status: 'PUBLISHED' });
+    this.http.put<Article>(`${this.postEndpoint}/${id}/updateStatus`,"PUBLISHED").pipe(
+        tap(savedArticle => {
+          console.log('Deleted article:');
+        }),
+        catchError(error => {
+          console.error('Error deleting article:', error);
+          throw error;
+        })
+    ).subscribe();
   }
 
   rejectArticle(id: number): void {
-    this.updateArticle(id, { status: 'REJECTED' });
+    this.http.put<Article>(`${this.postEndpoint}/${id}/updateStatus`,"REJECTED").pipe(
+        tap(savedArticle => {
+          console.log('Deleted article:');
+        }),
+        catchError(error => {
+          console.error('Error deleting article:', error);
+          throw error;
+        })
+    ).subscribe();
   }
 
   addComment(articleId: number, commentData: { content: string; authorId: string }): void {
@@ -125,9 +155,6 @@ export class ArticleService {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      /*this.updateArticle(articleId, {
-        comments: [...article.comments, newComment]
-      });*/
     }
   }
 

@@ -50,16 +50,20 @@ public class PostService {
         }
     }
 
-    public Optional<Post> publishPost(Long id) {
+    public Optional<Post> updateStatus(Long id, String newStatus) {
         try {
+            PostStatus status = PostStatus.valueOf(newStatus);
+
             return postRepository.findById(id)
                     .map(post -> {
-                        post.setStatus(PostStatus.PUBLISHED);
+                        post.setStatus(status);
                         post.setUpdatedAt(LocalDateTime.now());
                         return postRepository.save(post);
                     });
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status: " + newStatus);
         } catch (Exception e) {
-            throw new PostPublishException("Failed to publish posts: " + e.getMessage());
+            throw new PostPublishException("Failed to publish post: " + e.getMessage());
         }
     }
 

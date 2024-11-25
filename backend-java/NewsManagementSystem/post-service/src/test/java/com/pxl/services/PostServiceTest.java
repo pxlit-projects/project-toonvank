@@ -84,7 +84,7 @@ class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(postRepository.save(post)).thenReturn(post);
 
-        Optional<Post> result = postService.publishPost(1L);
+        Optional<Post> result = postService.updateStatus(1L);
 
         assertTrue(result.isPresent());
         assertEquals(PostStatus.PUBLISHED, result.get().getStatus());
@@ -96,7 +96,7 @@ class PostServiceTest {
     void publishPost_ShouldReturnEmpty_WhenPostDoesNotExist() {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Optional<Post> result = postService.publishPost(1L);
+        Optional<Post> result = postService.updateStatus(1L);
 
         assertFalse(result.isPresent());
         verify(postRepository, times(1)).findById(1L);

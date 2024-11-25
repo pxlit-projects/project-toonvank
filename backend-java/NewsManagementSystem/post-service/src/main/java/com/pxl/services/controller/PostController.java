@@ -35,9 +35,9 @@ public class PostController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PutMapping("/{id}/publish")
-    public ResponseEntity<Post> publishPost(@PathVariable Long id) {
-        Optional<Post> post = postService.publishPost(id);
+    @PutMapping("/{id}/updateStatus")
+    public ResponseEntity<Post> updateStatus(@PathVariable Long id, @RequestBody String newStatus) {
+        Optional<Post> post = postService.updateStatus(id, newStatus);
         return post.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

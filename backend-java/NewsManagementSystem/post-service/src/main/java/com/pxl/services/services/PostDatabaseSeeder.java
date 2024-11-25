@@ -26,6 +26,7 @@ public class PostDatabaseSeeder {
             post1.setCategory("Tutorial");
             post1.setStatus(PostStatus.PUBLISHED);
             post1.setCreatedAt(LocalDateTime.now());
+            post1.setUpdatedAt(LocalDateTime.now());
 
             Post post2 = new Post();
             post2.setTitle("Advanced Spring Security");
@@ -34,6 +35,7 @@ public class PostDatabaseSeeder {
             post2.setCategory("Security");
             post2.setStatus(PostStatus.PUBLISHED);
             post2.setCreatedAt(LocalDateTime.now());
+            post2.setUpdatedAt(LocalDateTime.now());
 
             postRepository.save(post1);
             postRepository.save(post2);
