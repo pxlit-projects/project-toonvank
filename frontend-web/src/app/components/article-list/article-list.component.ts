@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArticleService } from '../../services/article.service';
-import {Article, ArticleDTO} from '../../models/article.model';
+import { ArticleDTO } from '../../models/article.model';
 
 @Component({
   selector: 'app-article-list',
@@ -10,88 +10,89 @@ import {Article, ArticleDTO} from '../../models/article.model';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="container mx-auto p-4">
+      <!-- Filters -->
       <div class="mb-4 flex gap-4">
-        <div>
-          <input
+        <input
             type="text"
             [(ngModel)]="searchTerm"
-            placeholder="Search articles..."
+            placeholder="Search articles & authors..."
             class="p-2 border rounded"
-          />
-        </div>
-        <div>
-          <select [(ngModel)]="selectedCategory" class="p-2 border rounded">
-            <option value="">All Categories</option>
-            <option value="news">News</option>
-            <option value="updates">Updates</option>
-            <option value="announcements">Announcements</option>
-          </select>
-        </div>
-        <div>
-          <select [(ngModel)]="viewMode" class="p-2 border rounded">
-            <option value="published">Published</option>
-            <option value="drafts">My Drafts</option>
-          </select>
-        </div>
+        />
+        <select [(ngModel)]="selectedCategory" class="p-2 border rounded">
+          <option value="">All Categories</option>
+          <option value="news">News</option>
+          <option value="updates">Updates</option>
+          <option value="announcements">Announcements</option>
+        </select>
+        <select [(ngModel)]="selectedAuthor" class="p-2 border rounded">
+          <option value="" disabled>Select an author</option>
+          <option *ngFor="let author of uniqueAuthors" [ngValue]="author">
+            {{ author }}
+          </option>
+        </select>
+        <input type="date" [(ngModel)]="startDate" class="p-2 border rounded" />
+        <input type="date" [(ngModel)]="endDate" class="p-2 border rounded" />
       </div>
 
+      <!-- Article List -->
       <div class="grid gap-4">
-        @if (filteredArticles.length === 0) {
-          <p class="text-gray-600">No articles found.</p>
-        }
-
-        @for (article of filteredArticles; track article.id) {
-          <div class="border p-4 rounded shadow-sm">
-            <h2 class="text-xl font-bold">{{ article.title }}</h2>
-            <p class="text-gray-600">{{ article.category }}</p>
-            <p class="mt-2">{{ article.content }}</p>
-            <p class="text-sm text-gray-500 mt-2">Last updated: {{ article.updatedAt | date:'medium' }}</p>
-            <div class="mt-4">
-              <h3 class="font-bold">Comments</h3>
-              <p>Not implemented, check commented code</p>
-              <!--@for (comment of article.comments; track comment.id) {
-                <div class="ml-4 mt-2 p-2 bg-gray-50 rounded">
-                  <p>{{ comment.content }}</p>
-                  <p class="text-sm text-gray-500">{{ comment.createdAt | date:'medium' }}</p>
-                </div>
-              }-->
-            </div>
-          </div>
-        }
+        <p *ngIf="filteredArticles.length === 0" class="text-gray-600">No articles found.</p>
+        <div
+            *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
+            class="border p-4 rounded shadow-sm"
+        >
+          <h2 class="text-xl font-bold">{{ article.title }}</h2>
+          <p class="text-gray-600">{{ article.category }}</p>
+          <p class="mt-2">{{ article.content }}</p>
+          <p class="text-sm text-gray-500 mt-2">Last updated: {{ article.updatedAt | date: 'medium' }}</p>
+          <p class="text-sm text-gray-500 mt-2">Posted by: {{ article.author }}</p>
+        </div>
       </div>
     </div>
-  `
+  `,
 })
 export class ArticleListComponent implements OnInit {
   articles: ArticleDTO[] = [];
   searchTerm = '';
   selectedCategory = '';
-  viewMode: 'published' | 'drafts' = 'published';
+  startDate = '';
+  endDate = '';
+  selectedAuthor = '';
+  uniqueAuthors: string[] = [];
 
   constructor(private articleService: ArticleService) {}
 
   ngOnInit() {
-    this.loadArticles();
+    this.articleService.getArticles().subscribe((articles) => {
+      this.articles = articles;
+      this.uniqueAuthors = this.getUniqueAuthors(); // Populate uniqueAuthors after articles are fetched
+    });
   }
 
-  loadArticles() {
-    if (this.viewMode === 'published') {
-      this.articleService.getPublishedArticles().subscribe(
-        articles => this.articles = articles
-      );
-    } else {
-      this.articleService.getDraftArticles().subscribe(
-        articles => this.articles = articles
-      );
-    }
+  getUniqueAuthors(): string[] {
+    return [...new Set(this.articles.map((article) => article.author))];
   }
 
   get filteredArticles(): ArticleDTO[] {
-    return this.articles.filter(article => {
-      const matchesSearch = article.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                          article.content.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesCategory = !this.selectedCategory || article.category === this.selectedCategory;
-      return matchesSearch && matchesCategory;
+    return this.articles.filter((article) => {
+      const matchesSearch =
+          article.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          article.content.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          article.author.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesCategory =
+          !this.selectedCategory || article.category === this.selectedCategory;
+      const articleDate = new Date(article.updatedAt);
+      const matchesDate =
+          (!this.startDate || articleDate >= new Date(this.startDate)) &&
+          (!this.endDate || articleDate <= new Date(this.endDate));
+      const matchesAuthor =
+          !this.selectedAuthor || article.author === this.selectedAuthor;
+
+      return matchesSearch && matchesCategory && matchesDate && matchesAuthor;
     });
+  }
+
+  trackByArticleId(index: number, article: ArticleDTO): number {
+    return article.id;
   }
 }

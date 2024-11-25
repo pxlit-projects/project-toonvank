@@ -37,8 +37,18 @@ public class PostDatabaseSeeder {
             post2.setCreatedAt(LocalDateTime.now());
             post2.setUpdatedAt(LocalDateTime.now());
 
+            Post post3 = new Post();
+            post3.setTitle("Advanced Spring Security");
+            post3.setContent("Learn about advanced security concepts in Spring.");
+            post3.setAuthor("Jane Smith");
+            post3.setCategory("announcements");
+            post3.setStatus(PostStatus.PUBLISHED);
+            post3.setCreatedAt(LocalDateTime.now().minusMonths(2));
+            post3.setUpdatedAt(LocalDateTime.now());
+
             postRepository.save(post1);
             postRepository.save(post2);
+            postRepository.save(post3);
 
             System.out.println("Database has been seeded with sample posts.");
         }
