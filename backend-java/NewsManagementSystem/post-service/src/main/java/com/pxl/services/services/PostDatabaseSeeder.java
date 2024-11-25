@@ -23,7 +23,7 @@ public class PostDatabaseSeeder {
             post1.setTitle("Introduction to Spring Boot");
             post1.setContent("This is a beginner's guide to Spring Boot.");
             post1.setAuthor("John Doe");
-            post1.setCategory("Tutorial");
+            post1.setCategory("updates");
             post1.setStatus(PostStatus.PUBLISHED);
             post1.setCreatedAt(LocalDateTime.now());
             post1.setUpdatedAt(LocalDateTime.now());
@@ -32,7 +32,7 @@ public class PostDatabaseSeeder {
             post2.setTitle("Advanced Spring Security");
             post2.setContent("Learn about advanced security concepts in Spring.");
             post2.setAuthor("Jane Smith");
-            post2.setCategory("Security");
+            post2.setCategory("announcements");
             post2.setStatus(PostStatus.PUBLISHED);
             post2.setCreatedAt(LocalDateTime.now());
             post2.setUpdatedAt(LocalDateTime.now());
