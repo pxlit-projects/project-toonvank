@@ -1,20 +1,33 @@
-import { Component, inject } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
-import { provideRouter, RouterModule, RouterOutlet, Routes } from '@angular/router';
-import { AuthenticationService } from './app/services/authentication/auth.service';
-import { UserRole } from './app/services/authentication/user-roles.enum';
-import {ArticleListComponent} from "./app/components/article-list/article-list.component";
-import {ArticleEditorComponent} from "./app/components/article-editor/article-editor.component";
-import {ReviewQueueComponent} from "./app/components/review-queue/review-queue.component";
-import {DraftsComponent} from "./app/components/drafts/drafts.component";
-import {LoginComponent} from "./app/components/login/login.component";
+import {Component, inject} from '@angular/core';
+import {bootstrapApplication} from '@angular/platform-browser';
+import {CommonModule} from '@angular/common';
+import {provideRouter, Router, RouterModule, RouterOutlet, Routes} from '@angular/router';
+import {ArticleListComponent} from './app/components/article-list/article-list.component';
+import {ArticleEditorComponent} from './app/components/article-editor/article-editor.component';
+import {ReviewQueueComponent} from './app/components/review-queue/review-queue.component';
+import {DraftsComponent} from './app/components/drafts/drafts.component';
+import {provideHttpClient} from '@angular/common/http';
+import {LoginComponent} from './app/components/login/login.component';
+import {UserRole} from './app/services/authentication/user-roles.enum';
+import {AuthenticationService} from "./app/services/authentication/auth.service";
+
+const roleGuard = (requiredRoles: UserRole[]) => {
+  const authService = inject(AuthenticationService);
+  const router = inject(Router);
+
+  if (requiredRoles.some(role => authService.hasRole(role))) {
+    return true;
+  } else {
+    router.navigate(['/login']);
+    return false;
+  }
+};
 
 const routes: Routes = [
-  { path: 'articles', component: ArticleListComponent, canActivate: [() => inject(AuthenticationService).hasRole(UserRole.Hoofdredacteur)] },
-  { path: 'editor', component: ArticleEditorComponent, canActivate: [() => inject(AuthenticationService).hasRole(UserRole.Redacteur)] },
-  { path: 'review', component: ReviewQueueComponent, canActivate: [() => inject(AuthenticationService).hasRole(UserRole.Gebruiker)] },
-  { path: 'drafts', component: DraftsComponent, canActivate: [() => inject(AuthenticationService).hasRole(UserRole.Redacteur)] },
+  { path: 'articles', component: ArticleListComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur, UserRole.Gebruiker])] },
+  { path: 'editor', component: ArticleEditorComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur])] },
+  { path: 'review', component: ReviewQueueComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur])] },
+  { path: 'drafts', component: DraftsComponent, canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])] },
   { path: 'login', component: LoginComponent },
   { path: '**', redirectTo: '/login' }
 ];
@@ -34,7 +47,7 @@ const routes: Routes = [
         <div class="ml-auto flex items-center gap-4">
           <a *ngIf="!userRole" routerLink="/login" class="hover:text-gray-300">Login</a>
           <a *ngIf="userRole" (click)="logout()" class="hover:text-gray-300">Logout</a>
-          <span class="text-sm">({{ userRole }})</span>
+          <span class="text-sm">({{ userRole?.toString() }})</span>
         </div>
       </div>
     </nav>
@@ -43,6 +56,8 @@ const routes: Routes = [
   `
 })
 export class App {
+  name = 'News Management System';
+
   constructor(private authService: AuthenticationService) {}
 
   get userRole() {
@@ -57,6 +72,7 @@ export class App {
 bootstrapApplication(App, {
   providers: [
     provideRouter(routes),
+    provideHttpClient(),
     AuthenticationService
   ]
 }).catch(err => console.error(err));
