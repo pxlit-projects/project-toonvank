@@ -16,11 +16,6 @@ export class AuthenticationService {
         return this.getUserRole() === requiredRole;
     }
 
-    hasRoles(...requiredRoles: UserRole[]): boolean {
-        const userRole = this.getUserRole();
-        return userRole ? requiredRoles.includes(userRole) : false;
-    }
-
     logout(): void {
         localStorage.clear();
         this.router.navigate(['/login']);

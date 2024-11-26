@@ -18,7 +18,12 @@ const roleGuard = (requiredRoles: UserRole[]) => {
   if (requiredRoles.some(role => authService.hasRole(role))) {
     return true;
   } else {
-    router.navigate(['/login']);
+    if (requiredRoles.some(role => authService.hasRole(UserRole.Gebruiker))){
+      router.navigate(['/articles']);
+    }
+    else{
+      router.navigate(['/login']);
+    }
     return false;
   }
 };
@@ -40,9 +45,13 @@ const routes: Routes = [
     <nav class="bg-gray-800 text-white p-4">
       <div class="container mx-auto flex gap-4">
         <a routerLink="/articles" class="hover:text-gray-300">Articles</a>
-        <a routerLink="/editor" class="hover:text-gray-300">New Article</a>
-        <a routerLink="/drafts" class="hover:text-gray-300">My Drafts</a>
-        <a routerLink="/review" class="hover:text-gray-300">Review Queue</a>
+        @if (isHoofdredacteur() || isRedacteur()) {
+          <a routerLink="/editor" class="hover:text-gray-300">New Article</a>
+          <a routerLink="/drafts" class="hover:text-gray-300">My Drafts</a>
+        }
+        @if (isHoofdredacteur()) {
+          <a routerLink="/review" class="hover:text-gray-300">Review Queue</a>
+        }
 
         <div class="ml-auto flex items-center gap-4">
           <a *ngIf="!userRole" routerLink="/login" class="hover:text-gray-300">Login</a>
@@ -62,6 +71,18 @@ export class App {
 
   get userRole() {
     return this.authService.getUserRole();
+  }
+
+  isGebruiker() {
+    return this.authService.hasRole(UserRole.Gebruiker);
+  }
+
+  isRedacteur() {
+    return this.authService.hasRole(UserRole.Redacteur);
+  }
+
+  isHoofdredacteur() {
+    return this.authService.hasRole(UserRole.Hoofdredacteur);
   }
 
   logout() {

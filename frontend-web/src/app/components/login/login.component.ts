@@ -68,7 +68,7 @@ export class LoginComponent {
 
     login() {
         localStorage.setItem('userRole', this.selectedRole);
-        this.router.navigate(['/article-list']); // Redirect to a default route
+        this.router.navigate(['/articles']);
     }
 
     protected readonly UserRole = UserRole;
