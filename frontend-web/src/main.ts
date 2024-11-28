@@ -38,10 +38,9 @@ const routes: Routes = [
 ];
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterModule, RouterOutlet],
-  template: `
+    selector: 'app-root',
+    imports: [CommonModule, RouterModule, RouterOutlet],
+    template: `
     <nav class="bg-gray-800 text-white p-4">
       <div class="container mx-auto flex gap-4">
         <a routerLink="/articles" class="hover:text-gray-300">Articles</a>

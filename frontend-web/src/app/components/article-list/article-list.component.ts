@@ -6,8 +6,8 @@ import { ArticleDTO } from '../../models/article.model';
 
 @Component({
   selector: 'app-article-list',
-  standalone: true,
   imports: [CommonModule, FormsModule],
+  standalone: true,
   template: `
     <div class="container mx-auto p-4">
       <!-- Filters -->
@@ -30,8 +30,8 @@ import { ArticleDTO } from '../../models/article.model';
             {{ author }}
           </option>
         </select>
-        <input type="date" [(ngModel)]="startDate" class="p-2 border rounded" />
-        <input type="date" [(ngModel)]="endDate" class="p-2 border rounded" />
+        <input type="date" [(ngModel)]="startDate" class="p-2 border rounded"/>
+        <input type="date" [(ngModel)]="endDate" class="p-2 border rounded"/>
       </div>
 
       <!-- Article List -->
@@ -43,13 +43,13 @@ import { ArticleDTO } from '../../models/article.model';
         >
           <h2 class="text-xl font-bold">{{ article.title }}</h2>
           <p class="text-gray-600">{{ article.category }}</p>
-          <p class="mt-2">{{ article.content }}</p>
+          <p class="mt-2" [innerHTML]="article.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ article.updatedAt | date: 'medium' }}</p>
           <p class="text-sm text-gray-500 mt-2">Posted by: {{ article.author }}</p>
         </div>
       </div>
     </div>
-  `,
+  `
 })
 export class ArticleListComponent implements OnInit {
   articles: ArticleDTO[] = [];
