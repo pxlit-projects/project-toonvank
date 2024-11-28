@@ -51,6 +51,7 @@ import {Article, ArticleDTO} from '../../models/article.model';
         <div class="flex gap-2">
           <button
             type="submit"
+            (click)="saveArticle()"
             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Save as Draft
@@ -106,7 +107,7 @@ export class ArticleEditorComponent implements OnInit {
     } else {
       this.articleService.createArticle({
         ...this.article,
-        author: 'current-user-id',
+        author: localStorage.getItem("userName") || "no-user-id",
         status: 'DRAFT'
       }).subscribe(()=>console.log("fuck angular"));
     }
@@ -119,13 +120,13 @@ export class ArticleEditorComponent implements OnInit {
     if (this.isEditing && this.article.id) {
       this.articleService.updateArticle(this.article.id, {
         ...this.article,
-        status: 'DRAFT'
+        status: 'PENDING'
       });
     } else {
       this.articleService.createArticle({
         ...this.article,
-        author: 'current-user-id',
-        status: 'DRAFT'
+        author: localStorage.getItem("userName") || "no-user-id",
+        status: 'PENDING'
       });
     }
     this.router.navigate(['/']);

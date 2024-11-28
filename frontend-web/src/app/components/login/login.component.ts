@@ -68,6 +68,7 @@ export class LoginComponent {
 
     login() {
         localStorage.setItem('userRole', this.selectedRole);
+        localStorage.setItem('userName', this.userName);
         this.router.navigate(['/articles']);
     }
 
