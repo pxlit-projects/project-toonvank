@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import {BehaviorSubject, Observable, map, catchError, throwError, tap, of} from 'rxjs';
-import { Article, ArticleDTO, Comment } from '../models/article.model';
+import { Article, ArticleDTO } from '../models/article.model';
 import { HttpClient } from "@angular/common/http";
 import {data} from "autoprefixer";
 
@@ -43,12 +43,6 @@ export class ArticleService {
   getPendingArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
         map(articles => articles.filter(article => article.status === 'PENDING'))
-    );
-  }
-
-  getPublishedArticles(): Observable<ArticleDTO[]> {
-    return this.articles.pipe(
-        map(articles => articles.filter(article => article.status === 'PUBLISHED'))
     );
   }
 
@@ -106,10 +100,6 @@ export class ArticleService {
         tap(() => this.loadArticles()),
         catchError(this.handleError<Article>('updateArticleStatus'))
     ).subscribe();
-  }
-
-  addComment(articleId: number, commentData: { content: string; authorId: string }): void {
-    // Implement this logic server-side if necessary
   }
 
   private handleError<T>(operation = 'operation', result?: T) {
