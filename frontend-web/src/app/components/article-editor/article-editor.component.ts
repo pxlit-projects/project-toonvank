@@ -79,14 +79,18 @@ export class ArticleEditorComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Check if we're editing an existing article
     const articleId = this.route.snapshot.queryParams['id'];
     if (articleId) {
-      this.articleService.getArticles().subscribe(articles => {
-        const existingArticle = articles.find(a => a.id === articleId);
-        if (existingArticle) {
-          this.article = { ...existingArticle };
+      this.articleService.getArticleById(Number(articleId)).subscribe({
+        next: (article) => {
+          console.log(article)
+          this.article = { ...article };
           this.isEditing = true;
+        },
+        error: (error) => {
+          // Handle potential errors (e.g., article not found)
+          console.error('Error fetching article', error);
+          // Optionally show user-friendly error message
         }
       });
     }
@@ -105,7 +109,7 @@ export class ArticleEditorComponent implements OnInit {
         ...this.article,
         author: localStorage.getItem("userName") || "no-user-id",
         status: 'DRAFT'
-      }).subscribe(()=>console.log("fuck angular"));
+      }).subscribe();
     }
     this.router.navigate(['/drafts']);
   }

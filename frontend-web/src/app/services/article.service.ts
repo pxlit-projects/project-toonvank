@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, catchError, throwError, tap } from 'rxjs';
+import {BehaviorSubject, Observable, map, catchError, throwError, tap, of} from 'rxjs';
 import { Article, ArticleDTO, Comment } from '../models/article.model';
 import { HttpClient } from "@angular/common/http";
+import {data} from "autoprefixer";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,18 @@ export class ArticleService {
         tap(data => this.articles.next(data)),
         catchError(this.handleError<ArticleDTO[]>('loadArticles', []))
     ).subscribe();
+  }
+
+  public getArticleById(id: number): Observable<ArticleDTO> {
+    return this.http.get<ArticleDTO>(`${this.endpoint}/${id}`).pipe(
+        map(data => {
+          if (!data) {
+            throw new Error(`No article found with id ${id}`);
+          }
+          return data;
+        }),
+        catchError(this.handleError<ArticleDTO>('getArticleById'))
+    );
   }
 
   getArticles(): Observable<ArticleDTO[]> {

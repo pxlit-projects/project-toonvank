@@ -22,9 +22,6 @@ public class Comment {
     @Column(nullable = false)
     private UUID postId;
 
-    @Column(nullable = false)
-    private UUID userId;
-
     @Column(nullable = false, length = 1000)
     private String content;
 
