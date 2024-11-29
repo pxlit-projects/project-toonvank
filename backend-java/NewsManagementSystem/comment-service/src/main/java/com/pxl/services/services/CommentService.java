@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 //TODO add GlobalExceptionHandler
 @Service
@@ -30,7 +29,7 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
-    public List<Comment> getCommentsByPostId(UUID postId) {
+    public List<Comment> getCommentsByPostId(Long postId) {
         return commentRepository.findByPostId(postId);
     }
 
@@ -52,7 +51,6 @@ public class CommentService {
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isPresent()) {
             Comment comment = commentOptional.get();
-            comment.setDeleted(true);
             commentRepository.save(comment);
         } else {
             throw new RuntimeException("Comment not found with ID: " + id);

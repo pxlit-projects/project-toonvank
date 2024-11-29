@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ArticleService } from '../../services/article.service';
-import { ArticleDTO } from '../../models/article.model';
+import {CommonModule} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {Component, OnInit} from "@angular/core";
+import {ArticleDTO} from "../../models/article.model";
+import {ArticleService} from "../../services/article.service";
+import {CommentService} from "../../services/comment.service";
+import {CommentDTO} from "../../models/comment.model";
 
 @Component({
   selector: 'app-article-list',
@@ -37,15 +39,22 @@ import { ArticleDTO } from '../../models/article.model';
       <!-- Article List -->
       <div class="grid gap-4">
         <p *ngIf="filteredArticles.length === 0" class="text-gray-600">No articles found.</p>
-        <div
-            *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
-            class="border p-4 rounded shadow-sm"
-        >
+        <div *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
+            class="border p-4 rounded shadow-sm">
           <h2 class="text-xl font-bold">{{ article.title }}</h2>
           <p class="text-gray-600">{{ article.category }}</p>
           <p class="mt-2" [innerHTML]="article.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ article.updatedAt | date: 'medium' }}</p>
           <p class="text-sm text-gray-500 mt-2">Posted by: {{ article.author }}</p>
+
+          <div *ngIf="commentsMap[article.id]?.length; else noComments">
+            <div *ngFor="let comment of commentsMap[article.id]" class="border p-4 rounded shadow-sm">
+              <p>{{ comment.content }}</p>
+            </div>
+          </div>
+          <ng-template #noComments>
+            <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
+          </ng-template>
         </div>
       </div>
     </div>
@@ -53,6 +62,7 @@ import { ArticleDTO } from '../../models/article.model';
 })
 export class ArticleListComponent implements OnInit {
   articles: ArticleDTO[] = [];
+  commentsMap: { [articleId: number]: CommentDTO[] } = {};
   searchTerm = '';
   selectedCategory = '';
   startDate = '';
@@ -60,12 +70,21 @@ export class ArticleListComponent implements OnInit {
   selectedAuthor = '';
   uniqueAuthors: string[] = [];
 
-  constructor(private articleService: ArticleService) {}
+  constructor(private articleService: ArticleService, private commentService: CommentService) {}
 
   ngOnInit() {
     this.articleService.getArticles().subscribe((articles) => {
       this.articles = articles;
-      this.uniqueAuthors = this.getUniqueAuthors(); // Populate uniqueAuthors after articles are fetched
+      this.uniqueAuthors = this.getUniqueAuthors();
+      this.loadComments();
+    });
+  }
+
+  loadComments(): void {
+    this.articles.forEach((article: ArticleDTO) => {
+      this.commentService.getCommentByPostId(article.id).subscribe((comments: CommentDTO[]) => {
+        this.commentsMap[article.id] = comments;
+      });
     });
   }
 

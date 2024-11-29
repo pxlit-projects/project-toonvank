@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "comment")
@@ -20,7 +19,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private UUID postId;
+    private Long postId;
 
     @Column(nullable = false, length = 1000)
     private String content;
@@ -29,9 +28,6 @@ public class Comment {
     private LocalDateTime createdAt;
 
     private LocalDateTime editedAt;
-
-    @Column(nullable = false)
-    private boolean isDeleted = false;
 
     @PrePersist
     protected void onCreate() {
