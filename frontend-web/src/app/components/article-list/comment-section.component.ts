@@ -19,7 +19,7 @@ import { Comment } from "../../models/comment.model";
       <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
     </ng-template>
 
-    <div class="mt-4">
+    <div *ngIf="isAllowedToAdd" class="mt-4">
       <div class="flex gap-4">
         <input
           type="text"
@@ -40,6 +40,7 @@ import { Comment } from "../../models/comment.model";
 })
 export class CommentSectionComponent implements OnInit {
     @Input() articleId!: number;
+    @Input() isAllowedToAdd: boolean = true;
     comments: Comment[] = [];
     newComment = '';
 

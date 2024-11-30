@@ -55,7 +55,7 @@ import {CommentSectionComponent} from "../article-list/comment-section.component
           <p class="mt-2"  [innerHTML]="draft.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
 
-          <app-comment-section [articleId]="draft.id"></app-comment-section>
+          <app-comment-section [isAllowedToAdd]="false" [articleId]="draft.id"></app-comment-section>
 
           <div class="mt-4 flex gap-2">
             <a
