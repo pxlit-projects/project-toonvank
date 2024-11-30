@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,9 +25,15 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostDTO post) {
-        Post savedPost = postService.createPost(post);
-        return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
+    public ResponseEntity<?> createPost(@RequestBody PostDTO post) {
+        try {
+            Post savedPost = postService.createPost(post);
+            return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to create post: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")

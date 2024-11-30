@@ -48,7 +48,13 @@ export class ArticleService {
 
   getDraftArticles(): Observable<ArticleDTO[]> {
     return this.articles.pipe(
-        map(articles => articles.filter(article => article.status === 'DRAFT' || article.status === 'REJECTED'))
+        map(articles => articles.filter(article => article.status === 'DRAFT'))
+    );
+  }
+
+  getRejectedArticles(): Observable<ArticleDTO[]> {
+    return this.articles.pipe(
+        map(articles => articles.filter(article => article.status === 'REJECTED'!))
     );
   }
 

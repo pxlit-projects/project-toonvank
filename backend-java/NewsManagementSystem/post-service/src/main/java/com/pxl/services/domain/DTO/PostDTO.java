@@ -19,5 +19,4 @@ public class PostDTO {
     private LocalDateTime updatedAt;
     private String status;
     private String category;
-    //TODO relation to comment
 }

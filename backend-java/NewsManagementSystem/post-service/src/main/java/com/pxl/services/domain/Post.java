@@ -31,5 +31,4 @@ public class Post {
     private PostStatus status;
     @NonNull
     private String category;
-    //TODO relation to comment
 }
