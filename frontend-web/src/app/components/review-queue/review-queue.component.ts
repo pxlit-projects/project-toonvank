@@ -1,27 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArticleService } from '../../services/article.service';
-import {Article, ArticleDTO} from '../../models/article.model';
+import { ArticleDTO } from '../../models/article.model';
+import { ArticleCardComponent } from "../article-list/article-card.component";
+import { CommentSectionComponent } from "../article-list/comment-section.component";
 
 @Component({
   selector: 'app-review-queue',
-  imports: [CommonModule],
+  imports: [CommonModule, ArticleCardComponent, CommentSectionComponent],
   standalone: true,
   template: `
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-4">Review Queue</h2>
 
-      @if (pendingArticles.length === 0) {
-        <p class="text-gray-600">No articles pending review.</p>
-      }
+      <p *ngIf="pendingArticles.length === 0" class="text-gray-600">
+        No articles pending review.
+      </p>
 
-      @for (article of pendingArticles; track article.id) {
-        <div class="border p-4 rounded shadow-sm mb-4">
-          <h3 class="text-xl font-bold">{{ article.title }}</h3>
-          <p class="text-gray-600">Category: {{ article.category }}</p>
-          <p class="mt-2" [innerHTML]="article.content"></p>
-          <p class="text-sm text-gray-500 mt-2">Submitted: {{ article.createdAt | date:'medium' }}</p>
-
+      <div *ngFor="let article of pendingArticles; trackBy: trackByArticleId" class="mb-4">
+        <app-article-card [article]="article">
+          <app-comment-section [articleId]="article.id"></app-comment-section>
           <div class="mt-4 flex gap-2">
             <button
                 (click)="approveArticle(article.id)"
@@ -36,8 +34,8 @@ import {Article, ArticleDTO} from '../../models/article.model';
               Reject
             </button>
           </div>
-        </div>
-      }
+        </app-article-card>
+      </div>
     </div>
   `
 })
@@ -59,5 +57,9 @@ export class ReviewQueueComponent implements OnInit {
 
   rejectArticle(id: number) {
     this.articleService.rejectArticle(id);
+  }
+
+  trackByArticleId(index: number, article: ArticleDTO): number {
+    return article.id;
   }
 }

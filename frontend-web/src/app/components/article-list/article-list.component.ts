@@ -11,7 +11,6 @@ import {ArticleCardComponent} from "./article-card.component";
   imports: [CommonModule, FormsModule, ArticleCardComponent],
   template: `
     <div class="container mx-auto p-4">
-      <!-- Filters -->
       <div class="mb-4 flex gap-4">
         <input
             type="text"
