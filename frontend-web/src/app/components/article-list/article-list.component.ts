@@ -4,7 +4,7 @@ import {Component, OnInit} from "@angular/core";
 import {ArticleDTO} from "../../models/article.model";
 import {ArticleService} from "../../services/article.service";
 import {CommentService} from "../../services/comment.service";
-import {CommentDTO} from "../../models/comment.model";
+import {Comment} from "../../models/comment.model";
 
 @Component({
   selector: 'app-article-list',
@@ -36,7 +36,6 @@ import {CommentDTO} from "../../models/comment.model";
         <input type="date" [(ngModel)]="endDate" class="p-2 border rounded"/>
       </div>
 
-      <!-- Article List -->
       <div class="grid gap-4">
         <p *ngIf="filteredArticles.length === 0" class="text-gray-600">No articles found.</p>
         <div *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
@@ -50,11 +49,30 @@ import {CommentDTO} from "../../models/comment.model";
           <div *ngIf="commentsMap[article.id]?.length; else noComments">
             <div *ngFor="let comment of commentsMap[article.id]" class="border p-4 rounded shadow-sm">
               <p>{{ comment.content }}</p>
+              <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
             </div>
           </div>
           <ng-template #noComments>
             <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
           </ng-template>
+
+          <div class="mt-4">
+            <div class="flex gap-4">
+              <input
+                  type="text"
+                  [(ngModel)]="newComments[article.id]"
+                  placeholder="Add a comment..."
+                  class="flex-1 p-2 border rounded"
+                  (keyup.enter)="addComment(article.id)"
+              />
+              <button
+                  (click)="addComment(article.id)"
+                  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Post
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -62,7 +80,8 @@ import {CommentDTO} from "../../models/comment.model";
 })
 export class ArticleListComponent implements OnInit {
   articles: ArticleDTO[] = [];
-  commentsMap: { [articleId: number]: CommentDTO[] } = {};
+  commentsMap: { [articleId: number]: Comment[] } = {};
+  newComments: { [key: string]: string } = {};
   searchTerm = '';
   selectedCategory = '';
   startDate = '';
@@ -82,10 +101,33 @@ export class ArticleListComponent implements OnInit {
 
   loadComments(): void {
     this.articles.forEach((article: ArticleDTO) => {
-      this.commentService.getCommentByPostId(article.id).subscribe((comments: CommentDTO[]) => {
+      this.commentService.getCommentByPostId(article.id).subscribe((comments: Comment[]) => {
         this.commentsMap[article.id] = comments;
       });
     });
+  }
+
+  addComment(articleId: number) {
+    if (!this.newComments[articleId]?.trim()) {
+      return;
+    }
+
+    if (!this.commentsMap[articleId]) {
+      this.commentsMap[articleId] = [];
+    }
+
+    let addedComment = {
+          postId: articleId,
+          content: this.newComments[articleId],
+          createdAt: new Date(),
+          postedBy: localStorage.getItem("userName")!,
+      };
+
+    this.commentsMap[articleId].push(addedComment);
+
+    this.commentService.createComment(addedComment).subscribe();
+
+    this.newComments[articleId] = '';
   }
 
   getUniqueAuthors(): string[] {

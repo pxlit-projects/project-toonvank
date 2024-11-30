@@ -107,7 +107,7 @@ export class ArticleEditorComponent implements OnInit {
     } else {
       this.articleService.createArticle({
         ...this.article,
-        author: localStorage.getItem("userName") || "no-user-id",
+        author: localStorage.getItem("userName")!,
         status: 'DRAFT'
       }).subscribe();
     }
@@ -125,7 +125,7 @@ export class ArticleEditorComponent implements OnInit {
     } else {
       this.articleService.createArticle({
         ...this.article,
-        author: localStorage.getItem("userName") || "no-user-id",
+        author: localStorage.getItem("userName")!,
         status: 'PENDING'
       });
     }

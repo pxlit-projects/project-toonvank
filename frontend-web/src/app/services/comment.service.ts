@@ -10,12 +10,13 @@ export class CommentService {
   private endpoint: string = 'http://localhost:8086/comment/api/comments';
   http: HttpClient = inject(HttpClient);
 
-  public createComment(comment: Partial<Comment>, postId: number): Observable<boolean> {
+  public createComment(comment: Comment): Observable<boolean> {
     const newComment: Comment = {
-      postId,
+      postId: comment.postId!,
       content: comment.content!,
       createdAt: new Date(),
-      editedAt: new Date()
+      editedAt: new Date(),
+      postedBy: localStorage.getItem("userName")!,
     };
 
     return this.http.post<Comment>(this.endpoint, newComment).pipe(
@@ -36,15 +37,15 @@ export class CommentService {
     );
   }
 
-  public getCommentByPostId(id: number): Observable<CommentDTO[]> {
-    return this.http.get<CommentDTO[]>(`${this.endpoint}/post/${id}`).pipe(
+  public getCommentByPostId(id: number): Observable<Comment[]> {
+    return this.http.get<Comment[]>(`${this.endpoint}/post/${id}`).pipe(
         map(data => {
             if (!data || data.length === 0) {
                 throw new Error(`No comments found for post with id ${id}`);
             }
             return data;
         }),
-        catchError(this.handleError<CommentDTO[]>('getCommentByPostId', []))
+        catchError(this.handleError<Comment[]>('getCommentByPostId', []))
     );
   }
 

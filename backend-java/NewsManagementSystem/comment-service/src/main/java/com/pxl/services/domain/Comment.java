@@ -29,6 +29,8 @@ public class Comment {
 
     private LocalDateTime editedAt;
 
+    private String postedBy;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

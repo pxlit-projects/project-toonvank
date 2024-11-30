@@ -9,7 +9,7 @@ export class AuthenticationService {
     constructor(private router: Router) {}
 
     getUserRole(): UserRole | null {
-        return localStorage.getItem('userRole') as UserRole || null;
+        return localStorage.getItem('userRole') as UserRole
     }
 
     hasRole(requiredRole: UserRole): boolean {
