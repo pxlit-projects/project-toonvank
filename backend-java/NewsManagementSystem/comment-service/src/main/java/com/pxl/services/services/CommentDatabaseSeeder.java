@@ -3,12 +3,15 @@ package com.pxl.services.services;
 import com.pxl.services.domain.Comment;
 import com.pxl.services.repository.CommentRepository;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
 public class CommentDatabaseSeeder {
+    private static final Logger log = LoggerFactory.getLogger(CommentDatabaseSeeder.class);
     private final CommentRepository commentRepository;
 
     public CommentDatabaseSeeder(CommentRepository commentRepository) {
@@ -17,6 +20,7 @@ public class CommentDatabaseSeeder {
 
     @PostConstruct
     public void seedComments() {
+        log.info("Seeding comment database");
         if (commentRepository.count() == 0) {
             Comment comment1 = new Comment();
             comment1.setPostId(12L);

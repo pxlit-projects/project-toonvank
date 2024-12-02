@@ -6,6 +6,8 @@ import com.pxl.services.domain.PostStatus;
 import com.pxl.services.domain.mapper.PostMapper;
 import com.pxl.services.exceptions.*;
 import com.pxl.services.repository.PostRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,7 @@ import java.util.Optional;
 
 @Service
 public class PostService {
-
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
     private final PostRepository postRepository;
     private final PostMapper postMapper;
 
@@ -26,6 +28,7 @@ public class PostService {
     }
 
     public Post createPost(PostDTO postDTO) {
+        log.info("Creating new post");
         try {
             Post post = postMapper.toPost(postDTO);
             return postRepository.save(post);
@@ -35,6 +38,7 @@ public class PostService {
     }
 
     public Optional<Post> updatePost(Long id, Post updatedPost) {
+        log.info("Updating post");
         try {
             return postRepository.findById(id)
                     .map(post -> {
@@ -51,6 +55,7 @@ public class PostService {
     }
 
     public Optional<Post> updateStatus(Long id, String newStatus) {
+        log.info("Updating status");
         try {
             PostStatus status = PostStatus.valueOf(newStatus);
 
@@ -68,8 +73,8 @@ public class PostService {
     }
 
     public List<Post> getPosts() {
+        log.info("Getting posts");
         try {
-            var result = postRepository.findAll();
             return postRepository.findAll();
         } catch (Exception e) {
             throw new PostPublishException("Failed to retrieve PUBLISHED posts: " + e.getMessage());
@@ -77,6 +82,7 @@ public class PostService {
     }
 
     public List<Post> searchPosts(String content, String category, String author) {
+        log.info("Searching posts");
         try {
             return postRepository.findByContentContainingOrCategoryOrAuthor(content, category, author);
         } catch (Exception e) {
@@ -85,6 +91,7 @@ public class PostService {
     }
 
     public Optional<Post> getPostById(Long id) {
+        log.info("Getting post by id");
         try {
             return postRepository.findById(id);
         } catch (Exception e) {
@@ -93,6 +100,7 @@ public class PostService {
     }
 
     public boolean deletePost(Long id) {
+        log.info("Deleting post by id");
         if (postRepository.existsById(id)) {
             try {
                 postRepository.deleteById(id);

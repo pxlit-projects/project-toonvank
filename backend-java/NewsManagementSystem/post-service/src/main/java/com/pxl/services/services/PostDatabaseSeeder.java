@@ -4,12 +4,15 @@ import com.pxl.services.domain.Post;
 import com.pxl.services.domain.PostStatus;
 import com.pxl.services.repository.PostRepository;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
 public class PostDatabaseSeeder {
+    private static final Logger log = LoggerFactory.getLogger(PostDatabaseSeeder.class);
     private final PostRepository postRepository;
 
     public PostDatabaseSeeder(PostRepository postRepository) {
@@ -19,6 +22,8 @@ public class PostDatabaseSeeder {
     @PostConstruct
     public void seedPosts() {
         if (postRepository.count() == 0) {
+            log.info("Seeding post database");
+            
             Post post1 = new Post();
             post1.setTitle("Introduction to Spring Boot");
             post1.setContent("This is a beginner's guide to Spring Boot.");
