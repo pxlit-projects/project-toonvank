@@ -4,11 +4,12 @@ import { FormsModule } from "@angular/forms";
 import { ArticleDTO } from "../../models/article.model";
 import { ArticleService } from "../../services/article.service";
 import {ArticleCardComponent} from "./article-card.component";
+import {CommentSectionComponent} from "./comment-section.component";
 
 @Component({
   selector: "app-article-list",
   standalone: true,
-  imports: [CommonModule, FormsModule, ArticleCardComponent],
+  imports: [CommonModule, FormsModule, ArticleCardComponent, CommentSectionComponent],
   template: `
     <div class="container mx-auto p-4">
       <div class="mb-4 flex gap-4">
@@ -39,7 +40,7 @@ import {ArticleCardComponent} from "./article-card.component";
         <app-article-card
             *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
             [article]="article"
-        ></app-article-card>
+        ><app-comment-section [articleId]="article.id"></app-comment-section></app-article-card>
       </div>
     </div>
   `,
