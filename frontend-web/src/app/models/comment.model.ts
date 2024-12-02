@@ -7,7 +7,7 @@ export interface Comment {
 }
 export interface CommentDTO {
   id: number;
-  postId: string;
+  postId: number;
   content: string;
   createdAt: Date;
   editedAt?: Date;

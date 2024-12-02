@@ -50,8 +50,7 @@ public class CommentService {
     public void deleteComment(Long id) {
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isPresent()) {
-            Comment comment = commentOptional.get();
-            commentRepository.save(comment);
+            commentRepository.deleteById(id);
         } else {
             throw new RuntimeException("Comment not found with ID: " + id);
         }

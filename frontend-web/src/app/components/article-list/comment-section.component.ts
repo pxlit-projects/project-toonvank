@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { CommentService } from "../../services/comment.service";
-import { Comment } from "../../models/comment.model";
+import { Comment, CommentDTO } from "../../models/comment.model";
 
 @Component({
     selector: "app-comment-section",
@@ -11,8 +11,45 @@ import { Comment } from "../../models/comment.model";
     template: `
     <div *ngIf="comments.length; else noComments">
       <div *ngFor="let comment of comments" class="border p-4 rounded shadow-sm">
-        <p>{{ comment.content }}</p>
-        <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
+        <div *ngIf="editingCommentId === comment.id; else viewMode">
+          <textarea
+            [(ngModel)]="editableCommentContent"
+            rows="3"
+            class="w-full p-2 border rounded"
+          ></textarea>
+          <div class="flex gap-2 mt-2">
+            <button
+              (click)="saveEdit(comment)"
+              class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+            >
+              Save
+            </button>
+            <button
+              (click)="cancelEdit()"
+              class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        <ng-template #viewMode>
+          <p>{{ comment.content }}</p>
+          <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
+          <div class="flex gap-2 mt-2">
+            <button
+              (click)="startEdit(comment)"
+              class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              (click)="deleteComment(comment)"
+              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        </ng-template>
       </div>
     </div>
     <ng-template #noComments>
@@ -41,8 +78,10 @@ import { Comment } from "../../models/comment.model";
 export class CommentSectionComponent implements OnInit {
     @Input() articleId!: number;
     @Input() isAllowedToAdd: boolean = true;
-    comments: Comment[] = [];
+    comments: CommentDTO[] = [];
     newComment = '';
+    editingCommentId: number | null = null;
+    editableCommentContent: string = '';
 
     constructor(private commentService: CommentService) {}
 
@@ -57,7 +96,8 @@ export class CommentSectionComponent implements OnInit {
             return;
         }
 
-        const comment: Comment = {
+        const comment: CommentDTO = {
+            id: 0,
             postId: this.articleId,
             content: this.newComment,
             createdAt: new Date(),
@@ -69,5 +109,34 @@ export class CommentSectionComponent implements OnInit {
         this.commentService.createComment(comment).subscribe(() => {
             this.newComment = '';
         });
+    }
+
+    startEdit(comment: CommentDTO) {
+        this.editingCommentId = comment.id;
+        this.editableCommentContent = comment.content;
+    }
+
+    saveEdit(comment: Comment) {
+        if (!this.editableCommentContent.trim()) {
+            return;
+        }
+
+        comment.content = this.editableCommentContent;
+
+        this.commentService.updateComment(this.editingCommentId!,this.editableCommentContent).subscribe()
+
+        this.editingCommentId = null;
+        this.editableCommentContent = '';
+    }
+
+    cancelEdit() {
+        this.editingCommentId = null;
+        this.editableCommentContent = '';
+    }
+
+    deleteComment(comment: CommentDTO) {
+        this.comments = this.comments.filter(c => c.id !== comment.id);
+
+        this.commentService.deleteComment(comment.id).subscribe()
     }
 }
