@@ -1,4 +1,4 @@
-package com.pxl.services.domain;
+package com.pxl.services.domain.DTO;
 
 import java.io.Serializable;
 

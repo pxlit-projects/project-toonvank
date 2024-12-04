@@ -1,5 +1,6 @@
 package com.pxl.services.services;
 
+import com.pxl.services.domain.DTO.ReviewDTO;
 import com.pxl.services.domain.Review;
 import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.ReviewRepository;
@@ -25,7 +26,8 @@ public class ReviewService {
     public Review createReview(Review review) {
         log.info("Creating review: {}", review);
         review.setId(null);
-        rabbitTemplate.convertAndSend("reviewQueue", review);
+        ReviewDTO reviewDTO = new ReviewDTO(review.getId(), review.getPostId(), review.getReviewerId(), review.getStatus(), review.getComment(), review.getReviewedAt());
+        rabbitTemplate.convertAndSend("reviewQueue", reviewDTO);
         return reviewRepository.save(review);
     }
 

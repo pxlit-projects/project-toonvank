@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ArticleService } from '../../services/article.service';
+import { ReviewService } from '../../services/review.service';
 import { ArticleDTO } from '../../models/article.model';
 import {CommentSectionComponent} from "../article-list/comment-section.component";
+import {ReviewStatus} from "../../models/review.model";
 
 @Component({
   selector: 'app-drafts',
@@ -32,7 +34,7 @@ import {CommentSectionComponent} from "../article-list/comment-section.component
               Edit Draft
             </a>
             <button
-                (click)="submitForReview(draft.id)"
+                (click)="submitForReview(draft)"
                 class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Submit for Review
@@ -66,7 +68,7 @@ import {CommentSectionComponent} from "../article-list/comment-section.component
               Edit Post
             </a>
             <button
-                (click)="submitForReview(draft.id)"
+                (click)="submitForReview(draft)"
                 class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Resubmit for Review
@@ -114,7 +116,7 @@ export class DraftsComponent implements OnInit {
   rejected: ArticleDTO[] = [];
   pending: ArticleDTO[] = [];
 
-  constructor(private articleService: ArticleService) {}
+  constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
 
   ngOnInit() {
     this.loadDrafts();
@@ -140,9 +142,26 @@ export class DraftsComponent implements OnInit {
     });
   }
 
-  submitForReview(id: number) {
-    this.articleService.submitForReview(id);
-    this.loadDrafts();
+  submitForReview(article: ArticleDTO) {
+    this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
+      next: (review) => {
+        console.log('Review created successfully for approval:', review);
+      },
+      error: (error) => {
+        console.error('Error creating review for approval:', error);
+      }
+    });
+  }
+
+  createReviewForArticle(article: ArticleDTO, status: ReviewStatus) {
+    const newReview = {
+      postId: article.id,
+      reviewerId: 1,
+      status: status,
+      comment: '',
+    };
+
+    return this.reviewService.createReview(newReview);
   }
 
   deleteDraft(id: number) {
