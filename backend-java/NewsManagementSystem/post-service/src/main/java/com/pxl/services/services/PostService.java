@@ -8,6 +8,7 @@ import com.pxl.services.exceptions.*;
 import com.pxl.services.repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -111,5 +112,10 @@ public class PostService {
         } else {
             throw new PostDeletionException("Post with ID " + id + " not found.");
         }
+    }
+
+    @RabbitListener(queues = "reviewQueue")
+    public void processReviewMessage(String message) {
+        System.out.println("Received: " + message);
     }
 }

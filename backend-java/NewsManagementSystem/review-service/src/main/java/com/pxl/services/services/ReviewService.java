@@ -6,6 +6,7 @@ import com.pxl.services.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +20,12 @@ public class ReviewService {
     private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
 
     private final ReviewRepository reviewRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     public Review createReview(Review review) {
         log.info("Creating review: {}", review);
         review.setId(null);
+        rabbitTemplate.convertAndSend("reviewQueue", review);
         return reviewRepository.save(review);
     }
 
