@@ -21,20 +21,20 @@ public class Review {
     private Long id;
 
     @Column(nullable = false)
-    private Long postId; // References the Post being reviewed
+    private Long postId;
 
     @Column(nullable = false)
-    private Long reviewerId; // ID of the reviewer (user)
+    private Long reviewerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReviewStatus status; // Status of the review (PENDING, APPROVED, REJECTED)
+    private ReviewStatus status;
 
     @Column(length = 1000)
-    private String comment; // Optional review comment
+    private String comment;
 
     @Column(nullable = false)
-    private LocalDateTime reviewedAt; // Timestamp of when the review was made
+    private LocalDateTime reviewedAt;
 
     @PrePersist
     @PreUpdate

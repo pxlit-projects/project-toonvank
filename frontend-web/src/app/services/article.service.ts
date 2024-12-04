@@ -17,7 +17,7 @@ export class ArticleService {
     this.loadArticles();
   }
 
-  private loadArticles(): void {
+  public loadArticles(): void {
     this.http.get<ArticleDTO[]>(this.endpoint).pipe(
         tap(data => this.articles.next(data)),
         catchError(this.handleError<ArticleDTO[]>('loadArticles', []))
@@ -86,25 +86,6 @@ export class ArticleService {
     this.http.delete<Article>(`${this.endpoint}/${id}`).pipe(
         tap(() => this.loadArticles()),
         catchError(this.handleError<Article>('deleteArticle'))
-    ).subscribe();
-  }
-
-  submitForReview(id: number): void {
-    this.updateArticleStatus(id, 'PENDING');
-  }
-
-  approveArticle(id: number): void {
-    this.updateArticleStatus(id, 'PUBLISHED');
-  }
-
-  rejectArticle(id: number): void {
-    this.updateArticleStatus(id, 'REJECTED');
-  }
-
-  private updateArticleStatus(id: number, status: string): void {
-    this.http.put<Article>(`${this.endpoint}/${id}/updateStatus`, status).pipe(
-        tap(() => this.loadArticles()),
-        catchError(this.handleError<Article>('updateArticleStatus'))
     ).subscribe();
   }
 

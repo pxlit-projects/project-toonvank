@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArticleService } from '../../services/article.service';
+import { ReviewService } from '../../services/review.service';
 import { ArticleDTO } from '../../models/article.model';
+import { ReviewStatus } from '../../models/review.model';
 import { ArticleCardComponent } from "../article-list/article-card.component";
 import { CommentSectionComponent } from "../article-list/comment-section.component";
 
@@ -22,7 +24,7 @@ import { CommentSectionComponent } from "../article-list/comment-section.compone
           <app-comment-section [articleId]="article.id"></app-comment-section>
           <div class="mt-4 flex gap-2">
             <button
-                (click)="approveArticle(article.id)"
+                (click)="approveArticle(article)"
                 class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Approve
@@ -42,7 +44,7 @@ import { CommentSectionComponent } from "../article-list/comment-section.compone
 export class ReviewQueueComponent implements OnInit {
   pendingArticles: ArticleDTO[] = [];
 
-  constructor(private articleService: ArticleService) {}
+  constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
 
   ngOnInit() {
     this.articleService.getPendingArticles().subscribe(articles => {
@@ -51,12 +53,40 @@ export class ReviewQueueComponent implements OnInit {
     });
   }
 
-  approveArticle(id: number) {
-    this.articleService.approveArticle(id);
+  approveArticle(article: ArticleDTO) {
+    this.createReviewForArticle(article, ReviewStatus.APPROVED).subscribe({
+      next: (review) => {
+        console.log('Review created successfully for approval:', review);
+      },
+      error: (error) => {
+        console.error('Error creating review for approval:', error);
+      }
+    });
   }
 
   rejectArticle(id: number) {
-    this.articleService.rejectArticle(id);
+    const article = this.pendingArticles.find(a => a.id === id);
+    if (article) {
+      this.createReviewForArticle(article, ReviewStatus.REJECTED).subscribe({
+        next: (review) => {
+          console.log('Review created successfully for rejection:', review);
+        },
+        error: (error) => {
+          console.error('Error creating review for rejection:', error);
+        }
+      });
+    }
+  }
+
+  createReviewForArticle(article: ArticleDTO, status: ReviewStatus) {
+    const newReview = {
+      postId: article.id,
+      reviewerId: 1,
+      status: status,
+      comment: '',
+    };
+
+    return this.reviewService.createReview(newReview);
   }
 
   trackByArticleId(index: number, article: ArticleDTO): number {
