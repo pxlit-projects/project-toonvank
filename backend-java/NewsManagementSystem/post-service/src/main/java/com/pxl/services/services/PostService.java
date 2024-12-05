@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 @RabbitListener
+@Service
 public class PostService {
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
     private final PostRepository postRepository;
@@ -116,7 +116,7 @@ public class PostService {
     }
 
     @RabbitListener(queues = "reviewQueue")
-    public void processReviewMessage(String message) {
-        System.out.println("Received: " + message);
+    public void processReviewMessage(String reviewDTO) {
+        System.out.println("Received: " + reviewDTO);
     }
 }
