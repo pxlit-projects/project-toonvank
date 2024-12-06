@@ -1,6 +1,7 @@
 package com.pxl.services.services;
 
 import com.pxl.services.domain.DTO.PostDTO;
+import com.pxl.services.domain.DTO.ReviewDTO;
 import com.pxl.services.domain.Post;
 import com.pxl.services.domain.PostStatus;
 import com.pxl.services.domain.mapper.PostMapper;
@@ -116,7 +117,12 @@ public class PostService {
     }
 
     @RabbitListener(queues = "reviewQueue")
-    public void processReviewMessage(String reviewDTO) {
-        System.out.println("Received: " + reviewDTO);
+    public void processReviewMessage(ReviewDTO message) {
+        try {
+            System.out.println("Received message: " + message);
+            // Process review
+        } catch (Exception e) {
+            System.out.println("Failed to process review message: " + e.getMessage());
+        }
     }
 }

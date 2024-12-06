@@ -1,9 +1,14 @@
 package com.pxl.services.domain.DTO;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 public class ReviewDTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Long id;
