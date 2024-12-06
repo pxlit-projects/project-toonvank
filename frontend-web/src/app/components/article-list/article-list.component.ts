@@ -5,6 +5,8 @@ import { ArticleDTO } from "../../models/article.model";
 import { ArticleService } from "../../services/article.service";
 import {ArticleCardComponent} from "./article-card.component";
 import {CommentSectionComponent} from "./comment-section.component";
+import Swal from 'sweetalert2';
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: "app-article-list",

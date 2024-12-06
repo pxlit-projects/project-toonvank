@@ -6,6 +6,7 @@ import { ArticleDTO } from '../../models/article.model';
 import { ReviewStatus } from '../../models/review.model';
 import { ArticleCardComponent } from "../article-list/article-card.component";
 import { CommentSectionComponent } from "../article-list/comment-section.component";
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: 'app-review-queue',
@@ -45,7 +46,7 @@ export class ReviewQueueComponent implements OnInit {
   pendingArticles: ArticleDTO[] = [];
   currentComment: string = '';
 
-  constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
+  constructor(private articleService: ArticleService, private reviewService: ReviewService, private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.articleService.getPendingArticles().subscribe(articles => {
@@ -61,10 +62,10 @@ export class ReviewQueueComponent implements OnInit {
   approveArticle(article: ArticleDTO) {
     this.createReviewForArticle(article, ReviewStatus.APPROVED).subscribe({
       next: (review) => {
-        console.log('Review created successfully for approval:', review);
+        this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
       },
       error: (error) => {
-        console.error('Error creating review for approval:', error);
+        this.notificationService.showNotification('Error creating review for approval:', error, 'error');
       }
     });
   }
@@ -74,10 +75,10 @@ export class ReviewQueueComponent implements OnInit {
     if (article) {
       this.createReviewForArticle(article, ReviewStatus.REJECTED).subscribe({
         next: (review) => {
-          console.log('Review created successfully for rejection:', review);
+            this.notificationService.showNotification('Success', 'Review created successfully for rejection', 'success');
         },
         error: (error) => {
-          console.error('Error creating review for rejection:', error);
+            this.notificationService.showNotification('Error creating review for rejection:', error, 'error');
         }
       });
     }

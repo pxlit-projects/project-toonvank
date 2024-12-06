@@ -7,6 +7,7 @@ import { ArticleDTO } from '../../models/article.model';
 import { ReviewDTO } from '../../models/review.model';
 import {CommentSectionComponent} from "../article-list/comment-section.component";
 import {ReviewStatus} from "../../models/review.model";
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: 'app-drafts',
@@ -120,7 +121,7 @@ export class DraftsComponent implements OnInit {
   pending: ArticleDTO[] = [];
   reviews :ReviewDTO[] = [];
 
-  constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
+  constructor(private articleService: ArticleService, private reviewService: ReviewService, private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.loadDrafts();
@@ -156,10 +157,11 @@ export class DraftsComponent implements OnInit {
   submitForReview(article: ArticleDTO) {
     this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
       next: (review) => {
-        console.log('Review created successfully for approval:', review);
+        this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
+        this.loadDrafts();
       },
       error: (error) => {
-        console.error('Error creating review for approval:', error);
+        this.notificationService.showNotification('Error creating review for approval:', error, 'error');
       }
     });
   }
