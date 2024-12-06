@@ -3,7 +3,7 @@ package com.pxl.services.services;
 import com.pxl.services.domain.DTO.PostDTO;
 import com.pxl.services.domain.DTO.ReviewDTO;
 import com.pxl.services.domain.Post;
-import com.pxl.services.domain.PostStatus;
+import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.domain.mapper.PostMapper;
 import com.pxl.services.exceptions.*;
 import com.pxl.services.repository.PostRepository;
@@ -60,7 +60,7 @@ public class PostService {
     public Optional<Post> updateStatus(Long id, String newStatus) {
         log.info("Updating status");
         try {
-            PostStatus status = PostStatus.valueOf(newStatus);
+            ReviewStatus status = ReviewStatus.valueOf(newStatus);
 
             return postRepository.findById(id)
                     .map(post -> {
@@ -117,10 +117,16 @@ public class PostService {
     }
 
     @RabbitListener(queues = "reviewQueue")
-    public void processReviewMessage(ReviewDTO message) {
+    public void processReviewMessage(ReviewDTO review) {
         try {
-            System.out.println("Received message: " + message);
-            // Process review
+            log.info("Processing review message");
+            Optional<Post> post = postRepository.findById(review.getPostId());
+            if (post.isPresent()) {
+                post.get().setStatus(review.getStatus());
+                postRepository.save(post.get());
+            } else {
+                throw new PostNotFoundException("Post with ID " + review.getPostId() + " not found.");
+            }
         } catch (Exception e) {
             System.out.println("Failed to process review message: " + e.getMessage());
         }

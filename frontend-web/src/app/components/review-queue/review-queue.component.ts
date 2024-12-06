@@ -21,7 +21,7 @@ import { CommentSectionComponent } from "../article-list/comment-section.compone
 
       <div *ngFor="let article of pendingArticles; trackBy: trackByArticleId" class="mb-4">
         <app-article-card [article]="article">
-          <app-comment-section [articleId]="article.id"></app-comment-section>
+          <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
           <div class="mt-4 flex gap-2">
             <button
                 (click)="approveArticle(article)"
@@ -43,6 +43,7 @@ import { CommentSectionComponent } from "../article-list/comment-section.compone
 })
 export class ReviewQueueComponent implements OnInit {
   pendingArticles: ArticleDTO[] = [];
+  currentComment: string = '';
 
   constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
 
@@ -51,6 +52,10 @@ export class ReviewQueueComponent implements OnInit {
       this.pendingArticles = articles;
       console.log('Pending articles:', articles);
     });
+  }
+
+  onCommentAdded(comment: string) {
+    this.currentComment = comment;
   }
 
   approveArticle(article: ArticleDTO) {
@@ -79,11 +84,12 @@ export class ReviewQueueComponent implements OnInit {
   }
 
   createReviewForArticle(article: ArticleDTO, status: ReviewStatus) {
+    console.log(this.currentComment);
     const newReview = {
       postId: article.id,
       reviewerId: 1,
       status: status,
-      comment: '',
+      comment: this.currentComment || ''
     };
 
     return this.reviewService.createReview(newReview);

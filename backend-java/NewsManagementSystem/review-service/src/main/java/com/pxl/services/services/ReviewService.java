@@ -26,7 +26,7 @@ public class ReviewService {
     public Review createReview(Review review) {
         log.info("Creating review: {}", review);
         review.setId(null);
-        ReviewDTO reviewDTO = new ReviewDTO(review.getId(), review.getPostId(), review.getReviewerId(), review.getStatus(), review.getComment(), review.getReviewedAt());
+        ReviewDTO reviewDTO = new ReviewDTO(review.getPostId(), review.getReviewerId(), review.getStatus(), review.getComment(), review.getReviewedAt());
         rabbitTemplate.convertAndSend("reviewQueue", reviewDTO);
         return reviewRepository.save(review);
     }

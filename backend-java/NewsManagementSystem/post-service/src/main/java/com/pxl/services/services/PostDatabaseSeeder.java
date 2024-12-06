@@ -1,7 +1,7 @@
 package com.pxl.services.services;
 
 import com.pxl.services.domain.Post;
-import com.pxl.services.domain.PostStatus;
+import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.PostRepository;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -23,13 +23,13 @@ public class PostDatabaseSeeder {
     public void seedPosts() {
         if (postRepository.count() == 0) {
             log.info("Seeding post database");
-            
+
             Post post1 = new Post();
             post1.setTitle("Introduction to Spring Boot");
             post1.setContent("This is a beginner's guide to Spring Boot.");
             post1.setAuthor("John Doe");
             post1.setCategory("updates");
-            post1.setStatus(PostStatus.PUBLISHED);
+            post1.setStatus(ReviewStatus.PUBLISHED);
             post1.setCreatedAt(LocalDateTime.now());
             post1.setUpdatedAt(LocalDateTime.now());
 
@@ -38,7 +38,7 @@ public class PostDatabaseSeeder {
             post2.setContent("Learn about advanced security concepts in Spring.");
             post2.setAuthor("Jane Smith");
             post2.setCategory("announcements");
-            post2.setStatus(PostStatus.PUBLISHED);
+            post2.setStatus(ReviewStatus.PUBLISHED);
             post2.setCreatedAt(LocalDateTime.now());
             post2.setUpdatedAt(LocalDateTime.now());
 
@@ -47,7 +47,7 @@ public class PostDatabaseSeeder {
             post3.setContent("Learn about advanced security concepts in Spring.");
             post3.setAuthor("Jane Smith");
             post3.setCategory("announcements");
-            post3.setStatus(PostStatus.PUBLISHED);
+            post3.setStatus(ReviewStatus.PUBLISHED);
             post3.setCreatedAt(LocalDateTime.now().minusMonths(2));
             post3.setUpdatedAt(LocalDateTime.now());
 

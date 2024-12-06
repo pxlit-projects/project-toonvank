@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { CommentService } from "../../services/comment.service";
@@ -61,11 +61,12 @@ import { Comment, CommentDTO } from "../../models/comment.model";
         <input
           type="text"
           [(ngModel)]="newComment"
+          (ngModelChange)="onInputChange($event)"
           placeholder="Add a comment..."
           class="flex-1 p-2 border rounded"
           (keyup.enter)="addComment()"
         />
-        <button
+        <button *ngIf="isAllowedToPost"
           (click)="addComment()"
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
         >
@@ -77,7 +78,9 @@ import { Comment, CommentDTO } from "../../models/comment.model";
 })
 export class CommentSectionComponent implements OnInit {
     @Input() articleId!: number;
-    @Input() isAllowedToAdd: boolean = true;
+    @Input() isAllowedToAdd: boolean = true
+    @Input() isAllowedToPost: boolean = true
+    @Output() commentAdded = new EventEmitter<string>();
     comments: CommentDTO[] = [];
     newComment = '';
     editingCommentId: number | null = null;
@@ -89,6 +92,10 @@ export class CommentSectionComponent implements OnInit {
         this.commentService.getCommentByPostId(this.articleId).subscribe((comments) => {
             this.comments = comments;
         });
+    }
+
+    onInputChange(value: string) {
+        this.commentAdded.emit(value);
     }
 
     addComment() {

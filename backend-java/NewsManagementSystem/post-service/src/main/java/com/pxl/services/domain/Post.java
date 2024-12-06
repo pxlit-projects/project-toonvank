@@ -28,7 +28,7 @@ public class Post {
     private LocalDateTime updatedAt;
     @NonNull
     @Enumerated(EnumType.STRING)
-    private PostStatus status;
+    private ReviewStatus status;
     @NonNull
     private String category;
 }

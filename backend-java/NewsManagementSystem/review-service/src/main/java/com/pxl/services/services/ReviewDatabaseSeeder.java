@@ -27,7 +27,7 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
             Review review1 = Review.builder()
                     .postId(1L)
                     .reviewerId(100L)
-                    .status(ReviewStatus.APPROVED)
+                    .status(ReviewStatus.PUBLISHED)
                     .comment("Great post! Very informative.")
                     .reviewedAt(LocalDateTime.now())
                     .build();

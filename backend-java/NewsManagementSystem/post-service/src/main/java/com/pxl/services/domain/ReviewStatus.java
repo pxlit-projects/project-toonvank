@@ -1,8 +1,9 @@
 package com.pxl.services.domain;
 
-public enum PostStatus {
+public enum ReviewStatus {
     DRAFT,
     PUBLISHED,
     PENDING,
-    REJECTED
+    REJECTED,
+    APPROVED
 }

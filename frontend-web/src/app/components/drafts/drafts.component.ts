@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
 import { ArticleDTO } from '../../models/article.model';
+import { ReviewDTO } from '../../models/review.model';
 import {CommentSectionComponent} from "../article-list/comment-section.component";
 import {ReviewStatus} from "../../models/review.model";
 
@@ -56,9 +57,12 @@ import {ReviewStatus} from "../../models/review.model";
           <p class="text-gray-600">Category: {{ draft.category }}</p>
           <p class="mt-2"  [innerHTML]="draft.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-
-          <app-comment-section [isAllowedToAdd]="false" [articleId]="draft.id"></app-comment-section>
-
+          <div *ngFor="let review of reviews; trackBy: trackByReviewId">
+            <div *ngIf="review.postId == draft.id && review.status === 'REJECTED'">
+              <p class="text-sm text-red-500 mt-2">Rejected by: {{ review.reviewerId }}</p>
+              <p class="text-sm text-red-500 mt-2">Comment: {{ review.comment }}</p>
+            </div>
+          </div>
           <div class="mt-4 flex gap-2">
             <a
                 [routerLink]="['/editor']"
@@ -115,6 +119,7 @@ export class DraftsComponent implements OnInit {
   drafts: ArticleDTO[] = [];
   rejected: ArticleDTO[] = [];
   pending: ArticleDTO[] = [];
+  reviews :ReviewDTO[] = [];
 
   constructor(private articleService: ArticleService, private reviewService: ReviewService) {}
 
@@ -122,6 +127,7 @@ export class DraftsComponent implements OnInit {
     this.loadDrafts();
     this.loadRejectedArticles();
     this.loadPendingArticles();
+    this.loadReviews();
   }
 
   loadDrafts() {
@@ -140,6 +146,12 @@ export class DraftsComponent implements OnInit {
     this.articleService.getPendingArticles().subscribe(articles => {
       this.pending = articles;
     });
+  }
+
+  loadReviews() {
+      this.reviewService.getReviews().subscribe(reviews => {
+        this.reviews = reviews;
+      });
   }
 
   submitForReview(article: ArticleDTO) {
@@ -173,5 +185,9 @@ export class DraftsComponent implements OnInit {
 
   trackByArticleId(index: number, article: ArticleDTO): number {
     return article.id;
+  }
+
+  trackByReviewId(index: number, review: ReviewDTO): number {
+      return review.id;
   }
 }

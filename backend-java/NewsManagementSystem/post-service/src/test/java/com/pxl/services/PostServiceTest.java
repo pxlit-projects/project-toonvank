@@ -1,7 +1,7 @@
 package com.pxl.services;
 
 import com.pxl.services.domain.Post;
-import com.pxl.services.domain.PostStatus;
+import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.exceptions.PostCreationException;
 import com.pxl.services.repository.PostRepository;
 import com.pxl.services.services.PostService;
@@ -34,7 +34,7 @@ class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        post = new Post(1L, "Test Title", "Test Content", "Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Category");
+        post = new Post(1L, "Test Title", "Test Content", "Author", LocalDateTime.now(), LocalDateTime.now(), ReviewStatus.DRAFT, "Category");
     }
 
     @Test
@@ -56,7 +56,7 @@ class PostServiceTest {
 
     @Test
     void updatePost_ShouldReturnUpdatedPost_WhenPostExists() {
-        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Updated Category");
+        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), ReviewStatus.DRAFT, "Updated Category");
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(postRepository.save(post)).thenReturn(updatedPost);
 
@@ -70,7 +70,7 @@ class PostServiceTest {
 
     @Test
     void updatePost_ShouldReturnEmpty_WhenPostDoesNotExist() {
-        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), PostStatus.DRAFT, "Updated Category");
+        Post updatedPost = new Post(1L, "Updated Title", "Updated Content", "Updated Author", LocalDateTime.now(), LocalDateTime.now(), ReviewStatus.DRAFT, "Updated Category");
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<Post> result = postService.updatePost(1L, updatedPost);
@@ -87,7 +87,7 @@ class PostServiceTest {
         Optional<Post> result = postService.updateStatus(1L);
 
         assertTrue(result.isPresent());
-        assertEquals(PostStatus.PUBLISHED, result.get().getStatus());
+        assertEquals(ReviewStatus.PUBLISHED, result.get().getStatus());
         verify(postRepository, times(1)).findById(1L);
         verify(postRepository, times(1)).save(post);
     }
