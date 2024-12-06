@@ -26,7 +26,7 @@ public class ReviewService {
     public Review createReview(Review review) {
         log.info("Creating review: {}", review);
         review.setId(null);
-        ReviewDTO reviewDTO = new ReviewDTO(review.getPostId(), review.getReviewerId(), review.getStatus(), review.getComment(), review.getReviewedAt());
+        ReviewDTO reviewDTO = new ReviewDTO(review.getPostId(), review.getStatus(), review.getComment(), review.getReviewedAt());
         rabbitTemplate.convertAndSend("reviewQueue", reviewDTO);
         return reviewRepository.save(review);
     }
@@ -46,7 +46,6 @@ public class ReviewService {
         return reviewRepository.findById(id)
                 .map(review -> {
                     review.setPostId(updatedReview.getPostId());
-                    review.setReviewerId(updatedReview.getReviewerId());
                     review.setStatus(updatedReview.getStatus());
                     review.setComment(updatedReview.getComment());
                     return reviewRepository.save(review);
@@ -66,11 +65,6 @@ public class ReviewService {
     public List<Review> getReviewsByPostId(Long postId) {
         log.info("Getting reviews by post id: {}", postId);
         return reviewRepository.findByPostId(postId);
-    }
-
-    public List<Review> getReviewsByReviewerId(Long reviewerId) {
-        log.info("Getting reviews by reviewer id: {}", reviewerId);
-        return reviewRepository.findByReviewerId(reviewerId);
     }
 
     public List<Review> getReviewsByStatus(ReviewStatus status) {

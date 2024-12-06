@@ -71,13 +71,6 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/reviewer/{reviewerId}")
-    public ResponseEntity<List<Review>> getReviewsByReviewerId(@PathVariable Long reviewerId) {
-        log.info("Get reviews by reviewer id: {}", reviewerId);
-        List<Review> reviews = reviewService.getReviewsByReviewerId(reviewerId);
-        return ResponseEntity.ok(reviews);
-    }
-
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Review>> getReviewsByStatus(@PathVariable ReviewStatus status) {
         log.info("Get reviews by status: {}", status);

@@ -59,8 +59,7 @@ import {ReviewStatus} from "../../models/review.model";
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
           <div *ngFor="let review of reviews; trackBy: trackByReviewId">
             <div *ngIf="review.postId == draft.id && review.status === 'REJECTED'">
-              <p class="text-sm text-red-500 mt-2">Rejected by: {{ review.reviewerId }}</p>
-              <p class="text-sm text-red-500 mt-2">Comment: {{ review.comment }}</p>
+              <p class="text-sm text-red-500 mt-2">Reason for rejection: {{ review.comment || 'No reason provided' }} (reviewed at {{ review.reviewedAt | date: 'medium' }})</p>
             </div>
           </div>
           <div class="mt-4 flex gap-2">

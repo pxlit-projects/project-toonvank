@@ -63,7 +63,6 @@ export class ReviewService {
   createReview(review: Partial<Review>): Observable<Review> {
     const newReview: Review = {
       postId: review.postId || 0,
-      reviewerId: review.reviewerId || 0,
       status: review.status || ReviewStatus.PENDING,
       comment: review.comment || '',
       reviewedAt: new Date().toISOString(),

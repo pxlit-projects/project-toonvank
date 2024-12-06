@@ -26,7 +26,6 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
             // Create and save sample reviews
             Review review1 = Review.builder()
                     .postId(1L)
-                    .reviewerId(100L)
                     .status(ReviewStatus.PUBLISHED)
                     .comment("Great post! Very informative.")
                     .reviewedAt(LocalDateTime.now())
@@ -34,7 +33,6 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
 
             Review review2 = Review.builder()
                     .postId(1L)
-                    .reviewerId(101L)
                     .status(ReviewStatus.PENDING)
                     .comment("Needs more details on the topic.")
                     .reviewedAt(LocalDateTime.now())
@@ -42,7 +40,6 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
 
             Review review3 = Review.builder()
                     .postId(2L)
-                    .reviewerId(102L)
                     .status(ReviewStatus.REJECTED)
                     .comment("The post is not relevant.")
                     .reviewedAt(LocalDateTime.now())

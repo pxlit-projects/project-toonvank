@@ -23,9 +23,6 @@ public class Review {
     @Column(nullable = false)
     private Long postId;
 
-    @Column(nullable = false)
-    private Long reviewerId;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReviewStatus status;

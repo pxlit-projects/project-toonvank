@@ -7,7 +7,6 @@ export enum ReviewStatus {
 export interface ReviewDTO {
     id: number;
     postId: number;
-    reviewerId: number;
     status: ReviewStatus;
     comment?: string;
     reviewedAt: string;
@@ -15,7 +14,6 @@ export interface ReviewDTO {
 
 export interface Review {
     postId: number;
-    reviewerId: number;
     status: ReviewStatus;
     comment?: string;
     reviewedAt: string;
