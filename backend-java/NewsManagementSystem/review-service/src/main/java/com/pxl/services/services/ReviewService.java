@@ -71,4 +71,9 @@ public class ReviewService {
         log.info("Getting reviews by reviewer status: {}", status);
         return reviewRepository.findByStatus(status);
     }
+
+    public void deleteReviewsByPostId(Long postId) {
+        log.info("Deleting reviews by post id: {}", postId);
+        reviewRepository.deleteByPostId(postId);
+    }
 }

@@ -77,4 +77,11 @@ public class ReviewController {
         List<Review> reviews = reviewService.getReviewsByStatus(status);
         return ResponseEntity.ok(reviews);
     }
+
+    @DeleteMapping("/post/{postId}")
+    public ResponseEntity<Void> deleteReviewsByPostId(@PathVariable Long postId) {
+        log.info("Delete reviews by post id: {}", postId);
+        reviewService.deleteReviewsByPostId(postId);
+        return ResponseEntity.noContent().build();
+    }
 }

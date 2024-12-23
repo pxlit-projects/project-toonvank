@@ -1,5 +1,6 @@
 package com.pxl.services.services;
 
+import com.pxl.services.clients.ReviewClient;
 import com.pxl.services.domain.DTO.PostDTO;
 import com.pxl.services.domain.DTO.ReviewDTO;
 import com.pxl.services.domain.Post;
@@ -7,10 +8,10 @@ import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.domain.mapper.PostMapper;
 import com.pxl.services.exceptions.*;
 import com.pxl.services.repository.PostRepository;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,11 +24,12 @@ public class PostService {
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final ReviewClient reviewClient;
 
-    @Autowired
-    public PostService(PostRepository postRepository, PostMapper postMapper) {
+    public PostService(PostRepository postRepository, PostMapper postMapper, ReviewClient reviewClient) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.reviewClient = reviewClient;
     }
 
     public Post createPost(PostDTO postDTO) {
@@ -106,8 +108,11 @@ public class PostService {
         log.info("Deleting post by id");
         if (postRepository.existsById(id)) {
             try {
+                reviewClient.deleteReviewsByPostId(id);
                 postRepository.deleteById(id);
                 return true;
+            } catch (FeignException e) {
+                throw new PostDeletionException("Failed to delete associated reviews: " + e.getMessage());
             } catch (Exception e) {
                 throw new PostDeletionException("Failed to delete post with ID " + id + ": " + e.getMessage());
             }
