@@ -1,13 +1,5 @@
-FROM maven:3.8.4-openjdk-17 as builder
+FROM openjdk:21-slim
 WORKDIR /app
-COPY ./pom.xml ./pom.xml
-COPY ./src ./src
-RUN mvn clean package -DskipTests
-
-FROM openjdk:17
-WORKDIR /app
-COPY --from=builder /app/target/discovery-service-0.0.1-SNAPSHOT.jar app.jar
-COPY ../scripts/wait.sh ./wait.sh
-RUN chmod +x ./wait.sh
+COPY ./discovery-service/target/*.jar discovery.jar
 EXPOSE 8061
-ENTRYPOINT [ "/bin/bash", "-c", "./wait.sh localhost:8087/actuator/health -- java -jar app.jar" ]
+ENTRYPOINT ["java", "-jar", "discovery.jar"]
