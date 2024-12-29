@@ -1,42 +1,6 @@
 version: "3.3"
 
 services:
-  commentservicedb:
-    image: mysql:latest
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: "commentservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
-    networks:
-      - spring-cloud-network
-
-  postservicedb:
-    image: mysql:latest
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_DATABASE: "postservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
-    networks:
-      - spring-cloud-network
-
-  reviewservicedb:
-    image: mysql:latest
-    ports:
-      - "3308:3306"
-    environment:
-      MYSQL_DATABASE: "reviewservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
-    networks:
-      - spring-cloud-network
-
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -51,6 +15,50 @@ services:
     networks:
       - spring-cloud-network
 
+  commentservicedb:
+    container_name: commentservicedb
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "commentservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
+
+  postservicedb:
+    container_name: postservicedb
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: "postservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
+
+  reviewservicedb:
+    container_name: reviewservicedb
+    image: mysql:latest
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: "reviewservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-padmin" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   config-service:
     build:
       context: .
@@ -59,20 +67,24 @@ services:
       - "8088:8088"
     networks:
       - spring-cloud-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8088/discovery-service/default" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   discovery-service:
+    container_name: discovery-service
     build:
       context: .
       dockerfile: ./discovery-service/Dockerfile
     ports:
       - "8061:8061"
     depends_on:
-      - config-service
+      config-service:
+        condition: service_healthy
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_SERVER_PORT=8061
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
 
   messaging-service:
     build:
@@ -87,24 +99,23 @@ services:
         condition: service_started
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
-      - SPRING_RABBITMQ_HOST=rabbitmq
-
 
   review-service:
+    container_name: review-service
     build:
       context: ./
       dockerfile: ./review-service/Dockerfile
     ports:
       - "8085:8085"
     depends_on:
-      - discovery-service
-      - reviewservicedb
+      discovery-service:
+        condition: service_started
+      reviewservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
 
   post-service:
     build:
@@ -115,10 +126,9 @@ services:
     depends_on:
       - discovery-service
       - postservicedb
+      - rabbitmq
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
 
   comment-service:
     build:
@@ -131,8 +141,6 @@ services:
       - commentservicedb
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
 
   gateway-service:
     build:
@@ -144,11 +152,6 @@ services:
       - discovery-service
     networks:
       - spring-cloud-network
-    environment:
-      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
-      - SERVER_PORT=8061
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8061/eureka/
-
 networks:
   spring-cloud-network:
     driver: bridge
