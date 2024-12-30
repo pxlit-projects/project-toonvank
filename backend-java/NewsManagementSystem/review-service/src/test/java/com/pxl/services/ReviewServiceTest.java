@@ -1,93 +1,186 @@
-/*
 package com.pxl.services;
 
+import com.pxl.services.domain.DTO.ReviewDTO;
 import com.pxl.services.domain.Review;
+import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.ReviewRepository;
 import com.pxl.services.services.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
 
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
     @InjectMocks
     private ReviewService reviewService;
 
+    private Review mockReview;
+    private Long mockReviewId;
+    private Long mockPostId;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        mockReviewId = 1L;
+        mockPostId = 100L;
+        mockReview = Review.builder()
+                .id(mockReviewId)
+                .postId(mockPostId)
+                .status(ReviewStatus.DRAFT)
+                .comment("Test review")
+                .reviewedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
-    void createReview_ShouldSaveReview() {
-        Review review = new Review();
-        when(reviewRepository.save(review)).thenReturn(review);
+    void createReview_ShouldSaveReviewAndSendToQueue() {
+        // Arrange
+        when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
-        Review result = reviewService.createReview(review);
+        // Act
+        Review createdReview = reviewService.createReview(mockReview);
 
-        assertNotNull(result);
-        verify(reviewRepository, times(1)).save(review);
+        // Assert
+        assertNull(mockReview.getId());
+        verify(rabbitTemplate).convertAndSend(eq("reviewQueue"), any(ReviewDTO.class));
+        verify(reviewRepository).save(mockReview);
+        assertEquals(mockReview, createdReview);
     }
 
     @Test
-    void getReviewById_ShouldReturnReview() {
-        Review review = new Review();
-        when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
+    void getReviewById_ExistingReview_ShouldReturnReview() {
+        // Arrange
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
 
-        Optional<Review> result = reviewService.getReviewById(1L);
+        // Act
+        Optional<Review> foundReview = reviewService.getReviewById(mockReviewId);
 
-        assertTrue(result.isPresent());
-        assertEquals(review, result.get());
+        // Assert
+        assertTrue(foundReview.isPresent());
+        assertEquals(mockReview, foundReview.get());
     }
 
     @Test
-    void getAllReviews_ShouldReturnList() {
-        Review review1 = new Review();
-        Review review2 = new Review();
-        List<Review> reviews = Arrays.asList(review1, review2);
-        when(reviewRepository.findAll()).thenReturn(reviews);
+    void getAllReviews_ShouldReturnListOfReviews() {
+        // Arrange
+        List<Review> mockReviews = Collections.singletonList(mockReview);
+        when(reviewRepository.findAll()).thenReturn(mockReviews);
 
-        List<Review> result = reviewService.getAllReviews();
+        // Act
+        List<Review> reviews = reviewService.getAllReviews();
 
-        assertEquals(2, result.size());
-        verify(reviewRepository, times(1)).findAll();
+        // Assert
+        assertEquals(mockReviews, reviews);
     }
 
     @Test
-    void updateReview_ShouldUpdateReview() {
-        Review existingReview = new Review();
-        Review updatedReview = new Review();
-        updatedReview.setComment("Updated comment");
+    void updateReview_ExistingReview_ShouldUpdateAndSave() {
+        // Arrange
+        Review updatedReviewData = Review.builder()
+                .postId(200L)
+                .status(ReviewStatus.PUBLISHED)
+                .comment("Updated review")
+                .build();
 
-        when(reviewRepository.findById(1L)).thenReturn(Optional.of(existingReview));
-        when(reviewRepository.save(any(Review.class))).thenReturn(updatedReview);
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
+        when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
-        Review result = reviewService.updateReview(1L, updatedReview);
+        // Act
+        Review updatedReview = reviewService.updateReview(mockReviewId, updatedReviewData);
 
-        assertNotNull(result);
-        assertEquals("Updated comment", result.getComment());
+        // Assert
+        assertEquals(200L, updatedReview.getPostId());
+        assertEquals(ReviewStatus.PUBLISHED, updatedReview.getStatus());
+        assertEquals("Updated review", updatedReview.getComment());
+        verify(reviewRepository).save(mockReview);
     }
 
     @Test
-    void deleteReview_ShouldDeleteReview() {
-        when(reviewRepository.existsById(1L)).thenReturn(true);
+    void updateReview_NonExistingReview_ShouldThrowException() {
+        // Arrange
+        when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.empty());
 
-        reviewService.deleteReview(1L);
-
-        verify(reviewRepository, times(1)).deleteById(1L);
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () ->
+                reviewService.updateReview(mockReviewId, mockReview)
+        );
     }
-}*/
+
+    @Test
+    void deleteReview_ExistingReview_ShouldDelete() {
+        // Arrange
+        when(reviewRepository.existsById(mockReviewId)).thenReturn(true);
+
+        // Act
+        reviewService.deleteReview(mockReviewId);
+
+        // Assert
+        verify(reviewRepository).deleteById(mockReviewId);
+    }
+
+    @Test
+    void deleteReview_NonExistingReview_ShouldThrowException() {
+        // Arrange
+        when(reviewRepository.existsById(mockReviewId)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () ->
+                reviewService.deleteReview(mockReviewId)
+        );
+    }
+
+    @Test
+    void getReviewsByPostId_ShouldReturnReviews() {
+        // Arrange
+        List<Review> mockReviews = Collections.singletonList(mockReview);
+        when(reviewRepository.findByPostId(mockPostId)).thenReturn(mockReviews);
+
+        // Act
+        List<Review> reviews = reviewService.getReviewsByPostId(mockPostId);
+
+        // Assert
+        assertEquals(mockReviews, reviews);
+    }
+
+    @Test
+    void getReviewsByStatus_ShouldReturnReviews() {
+        // Arrange
+        ReviewStatus status = ReviewStatus.DRAFT;
+        List<Review> mockReviews = Collections.singletonList(mockReview);
+        when(reviewRepository.findByStatus(status)).thenReturn(mockReviews);
+
+        // Act
+        List<Review> reviews = reviewService.getReviewsByStatus(status);
+
+        // Assert
+        assertEquals(mockReviews, reviews);
+    }
+
+    @Test
+    void deleteReviewsByPostId_ShouldDeleteReviews() {
+        // Act
+        reviewService.deleteReviewsByPostId(mockPostId);
+
+        // Assert
+        verify(reviewRepository).deleteByPostId(mockPostId);
+    }
+}

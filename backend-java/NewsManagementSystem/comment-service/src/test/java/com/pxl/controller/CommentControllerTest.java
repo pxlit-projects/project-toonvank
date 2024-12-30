@@ -1,99 +1,168 @@
-/*
 package com.pxl.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxl.services.controller.CommentController;
 import com.pxl.services.domain.Comment;
 import com.pxl.services.services.CommentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
-//TODO this one does not work
-@WebMvcTest(CommentController.class)
+@ExtendWith(MockitoExtension.class)
 class CommentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private CommentService commentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private CommentController commentController;
 
-    private Comment comment;
+    private Comment testComment;
 
     @BeforeEach
     void setUp() {
-        comment = Comment.builder()
+        testComment = Comment.builder()
                 .id(1L)
-                .postId(UUID.randomUUID())
-                .userId(UUID.randomUUID())
-                .content("Sample comment")
+                .postId(100L)
+                .content("Test comment content")
+                .createdAt(LocalDateTime.now())
+                .postedBy("testUser")
                 .build();
     }
 
     @Test
-    void createComment() throws Exception {
-        when(commentService.createComment(any(Comment.class))).thenReturn(comment);
+    void createComment_Success() {
+        // Arrange
+        when(commentService.createComment(testComment)).thenReturn(testComment);
 
-        mockMvc.perform(post("/api/comments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(comment)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.content").value("Sample comment"));
+        // Act
+        ResponseEntity<Comment> response = commentController.createComment(testComment);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(testComment, response.getBody());
+        verify(commentService).createComment(testComment);
     }
 
     @Test
-    void getCommentById_found() throws Exception {
-        when(commentService.getCommentById(comment.getId())).thenReturn(Optional.of(comment));
+    void getCommentById_Exists() {
+        // Arrange
+        when(commentService.getCommentById(1L)).thenReturn(Optional.of(testComment));
 
-        mockMvc.perform(get("/api/comments/{id}", comment.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("Sample comment"));
+        // Act
+        ResponseEntity<Comment> response = commentController.getCommentById(1L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(testComment, response.getBody());
+        verify(commentService).getCommentById(1L);
     }
 
     @Test
-    void getCommentById_notFound() throws Exception {
-        when(commentService.getCommentById(2L)).thenReturn(Optional.empty());
+    void getCommentById_NotFound() {
+        // Arrange
+        when(commentService.getCommentById(1L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/comments/{id}", 2L))
-                .andExpect(status().isNotFound());
+        // Act
+        ResponseEntity<Comment> response = commentController.getCommentById(1L);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(commentService).getCommentById(1L);
     }
 
     @Test
-    void updateComment() throws Exception {
-        comment.setContent("Updated content");
-        when(commentService.updateComment(anyLong(), anyString())).thenReturn(comment);
+    void getCommentsByPostId_Success() {
+        // Arrange
+        List<Comment> postComments = Arrays.asList(testComment,
+                Comment.builder()
+                        .id(2L)
+                        .postId(100L)
+                        .content("Another test comment")
+                        .build());
 
-        mockMvc.perform(put("/api/comments/{id}", comment.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\": \"Updated content\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("Updated content"));
+        when(commentService.getCommentsByPostId(100L)).thenReturn(postComments);
+
+        // Act
+        ResponseEntity<List<Comment>> response = commentController.getCommentsByPostId(100L);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(commentService).getCommentsByPostId(100L);
+    }
+
+    /*@Test
+    void updateComment_Success() {
+        // Arrange
+        String newContent = "Updated comment content";
+        Comment updatedComment = testComment.toBuilder()
+                .content(newContent)
+                .editedAt(LocalDateTime.now())
+                .build();
+
+        when(commentService.updateComment(1L, newContent)).thenReturn(updatedComment);
+
+        // Act
+        ResponseEntity<Comment> response = commentController.updateComment(1L, newContent);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(newContent, response.getBody().getContent());
+        verify(commentService).updateComment(1L, newContent);
+    }*/
+
+    @Test
+    void updateComment_NotFound() {
+        // Arrange
+        String newContent = "Updated comment content";
+        when(commentService.updateComment(1L, newContent)).thenThrow(new RuntimeException());
+
+        // Act
+        ResponseEntity<Comment> response = commentController.updateComment(1L, newContent);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(commentService).updateComment(1L, newContent);
     }
 
     @Test
-    void deleteComment() throws Exception {
-        doNothing().when(commentService).deleteComment(comment.getId());
+    void deleteComment_Success() {
+        // Arrange
+        doNothing().when(commentService).deleteComment(1L);
 
-        mockMvc.perform(delete("/api/comments/{id}", comment.getId()))
-                .andExpect(status().isNoContent());
+        // Act
+        ResponseEntity<Void> response = commentController.deleteComment(1L);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(commentService).deleteComment(1L);
+    }
+
+    @Test
+    void deleteComment_NotFound() {
+        // Arrange
+        doThrow(new RuntimeException()).when(commentService).deleteComment(1L);
+
+        // Act
+        ResponseEntity<Void> response = commentController.deleteComment(1L);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(commentService).deleteComment(1L);
     }
 }
-*/

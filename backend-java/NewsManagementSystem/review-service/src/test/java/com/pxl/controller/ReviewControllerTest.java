@@ -1,24 +1,27 @@
-/*
-package com.pxl.controller;
+package com.pxl.services.controller;
 
-import com.pxl.services.controller.ReviewController;
 import com.pxl.services.domain.Review;
+import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.services.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ReviewControllerTest {
 
     @Mock
@@ -27,73 +30,191 @@ class ReviewControllerTest {
     @InjectMocks
     private ReviewController reviewController;
 
+    private Review mockReview;
+    private Long mockReviewId;
+    private Long mockPostId;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        mockReviewId = 1L;
+        mockPostId = 100L;
+        mockReview = Review.builder()
+                .id(mockReviewId)
+                .postId(mockPostId)
+                .status(ReviewStatus.DRAFT)
+                .comment("Test review")
+                .reviewedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
     void createReview_ShouldReturnCreatedReview() {
-        Review review = new Review();
-        when(reviewService.createReview(review)).thenReturn(review);
+        // Arrange
+        when(reviewService.createReview(any(Review.class))).thenReturn(mockReview);
 
-        ResponseEntity<Review> response = reviewController.createReview(review);
+        // Act
+        ResponseEntity<Review> response = reviewController.createReview(mockReview);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(review, response.getBody());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockReview, response.getBody());
+        verify(reviewService).createReview(mockReview);
     }
 
     @Test
-    void getReviewById_ShouldReturnReviewIfExists() {
-        Review review = new Review();
-        when(reviewService.getReviewById(1L)).thenReturn(Optional.of(review));
+    void getReviewById_ExistingReview_ShouldReturnReview() {
+        // Arrange
+        when(reviewService.getReviewById(mockReviewId)).thenReturn(Optional.of(mockReview));
 
-        ResponseEntity<Review> response = reviewController.getReviewById(1L);
+        // Act
+        ResponseEntity<Review> response = reviewController.getReviewById(mockReviewId);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(review, response.getBody());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockReview, response.getBody());
+        verify(reviewService).getReviewById(mockReviewId);
     }
 
     @Test
-    void getReviewById_ShouldReturnNotFoundIfDoesNotExist() {
-        when(reviewService.getReviewById(1L)).thenReturn(Optional.empty());
+    void getReviewById_NonExistingReview_ShouldReturnNotFound() {
+        // Arrange
+        when(reviewService.getReviewById(mockReviewId)).thenReturn(Optional.empty());
 
-        ResponseEntity<Review> response = reviewController.getReviewById(1L);
+        // Act
+        ResponseEntity<Review> response = reviewController.getReviewById(mockReviewId);
 
-        assertEquals(404, response.getStatusCodeValue());
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(reviewService).getReviewById(mockReviewId);
     }
 
     @Test
     void getAllReviews_ShouldReturnListOfReviews() {
-        Review review1 = new Review();
-        Review review2 = new Review();
-        List<Review> reviews = Arrays.asList(review1, review2);
-        when(reviewService.getAllReviews()).thenReturn(reviews);
+        // Arrange
+        List<Review> mockReviews = Arrays.asList(mockReview,
+                Review.builder()
+                        .id(2L)
+                        .postId(200L)
+                        .status(ReviewStatus.PUBLISHED)
+                        .comment("Another review")
+                        .reviewedAt(LocalDateTime.now())
+                        .build()
+        );
+        when(reviewService.getAllReviews()).thenReturn(mockReviews);
 
+        // Act
         ResponseEntity<List<Review>> response = reviewController.getAllReviews();
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(2, response.getBody().size());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockReviews, response.getBody());
+        verify(reviewService).getAllReviews();
     }
 
     @Test
-    void updateReview_ShouldReturnUpdatedReview() {
-        Review updatedReview = new Review();
-        updatedReview.setComment("Updated comment");
-        when(reviewService.updateReview(1L, updatedReview)).thenReturn(updatedReview);
+    void updateReview_ExistingReview_ShouldReturnUpdatedReview() {
+        // Arrange
+        Review updatedReview = Review.builder()
+                .id(mockReviewId)
+                .postId(mockPostId)
+                .status(ReviewStatus.PUBLISHED)
+                .comment("Updated review")
+                .reviewedAt(LocalDateTime.now())
+                .build();
+        when(reviewService.updateReview(eq(mockReviewId), any(Review.class))).thenReturn(updatedReview);
 
-        ResponseEntity<Review> response = reviewController.updateReview(1L, updatedReview);
+        // Act
+        ResponseEntity<Review> response = reviewController.updateReview(mockReviewId, updatedReview);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Updated comment", response.getBody().getComment());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updatedReview, response.getBody());
+        verify(reviewService).updateReview(eq(mockReviewId), eq(updatedReview));
     }
 
     @Test
-    void deleteReview_ShouldReturnNoContent() {
-        doNothing().when(reviewService).deleteReview(1L);
+    void updateReview_NonExistingReview_ShouldReturnNotFound() {
+        // Arrange
+        Review updatedReview = Review.builder()
+                .id(mockReviewId)
+                .postId(mockPostId)
+                .status(ReviewStatus.PUBLISHED)
+                .comment("Updated review")
+                .reviewedAt(LocalDateTime.now())
+                .build();
+        when(reviewService.updateReview(eq(mockReviewId), any(Review.class)))
+                .thenThrow(new IllegalArgumentException("Review not found"));
 
-        ResponseEntity<Void> response = reviewController.deleteReview(1L);
+        // Act
+        ResponseEntity<Review> response = reviewController.updateReview(mockReviewId, updatedReview);
 
-        assertEquals(204, response.getStatusCodeValue());
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(reviewService).updateReview(eq(mockReviewId), eq(updatedReview));
     }
-}*/
+
+    @Test
+    void deleteReview_ExistingReview_ShouldReturnNoContent() {
+        // Act
+        ResponseEntity<Void> response = reviewController.deleteReview(mockReviewId);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(reviewService).deleteReview(mockReviewId);
+    }
+
+    @Test
+    void deleteReview_NonExistingReview_ShouldReturnNotFound() {
+        // Arrange
+        doThrow(new IllegalArgumentException("Review not found"))
+                .when(reviewService).deleteReview(mockReviewId);
+
+        // Act
+        ResponseEntity<Void> response = reviewController.deleteReview(mockReviewId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(reviewService).deleteReview(mockReviewId);
+    }
+
+    @Test
+    void getReviewsByPostId_ShouldReturnReviews() {
+        // Arrange
+        List<Review> mockReviews = Collections.singletonList(mockReview);
+        when(reviewService.getReviewsByPostId(mockPostId)).thenReturn(mockReviews);
+
+        // Act
+        ResponseEntity<List<Review>> response = reviewController.getReviewsByPostId(mockPostId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockReviews, response.getBody());
+        verify(reviewService).getReviewsByPostId(mockPostId);
+    }
+
+    @Test
+    void getReviewsByStatus_ShouldReturnReviews() {
+        // Arrange
+        ReviewStatus status = ReviewStatus.DRAFT;
+        List<Review> mockReviews = Collections.singletonList(mockReview);
+        when(reviewService.getReviewsByStatus(status)).thenReturn(mockReviews);
+
+        // Act
+        ResponseEntity<List<Review>> response = reviewController.getReviewsByStatus(status);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockReviews, response.getBody());
+        verify(reviewService).getReviewsByStatus(status);
+    }
+
+    @Test
+    void deleteReviewsByPostId_ShouldReturnNoContent() {
+        // Act
+        ResponseEntity<Void> response = reviewController.deleteReviewsByPostId(mockPostId);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(reviewService).deleteReviewsByPostId(mockPostId);
+    }
+}
