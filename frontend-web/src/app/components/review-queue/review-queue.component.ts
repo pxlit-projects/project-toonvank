@@ -7,10 +7,18 @@ import { ReviewStatus } from '../../models/review.model';
 import { ArticleCardComponent } from "../article-list/article-card.component";
 import { CommentSectionComponent } from "../article-list/comment-section.component";
 import {NotificationService} from "../../services/notification.service";
+import {MatButtonModule} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
 
 @Component({
   selector: 'app-review-queue',
-  imports: [CommonModule, ArticleCardComponent, CommentSectionComponent],
+  imports: [
+    CommonModule,
+    ArticleCardComponent,
+    CommentSectionComponent,
+    MatButtonModule,
+    MatIconModule
+  ],
   standalone: true,
   template: `
     <div class="container mx-auto p-4">
@@ -22,22 +30,28 @@ import {NotificationService} from "../../services/notification.service";
 
       <div *ngFor="let article of pendingArticles; trackBy: trackByArticleId" class="mb-4">
         <app-article-card [article]="article">
-          <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
-          <div class="mt-4 flex gap-2">
-            <button
-                (click)="approveArticle(article)"
-                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Approve
-            </button>
-            <button
-                (click)="rejectArticle(article.id)"
-                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Reject
-            </button>
+          <div>
+            <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
           </div>
         </app-article-card>
+        <div class="mt-4 flex gap-2 justify-end">
+          <button
+              mat-raised-button
+              color="primary"
+              (click)="approveArticle(article)"
+          >
+            <mat-icon>check</mat-icon>
+            Approve
+          </button>
+          <button
+              mat-raised-button
+              color="warn"
+              (click)="rejectArticle(article.id)"
+          >
+            <mat-icon>close</mat-icon>
+            Reject
+          </button>
+        </div>
       </div>
     </div>
   `

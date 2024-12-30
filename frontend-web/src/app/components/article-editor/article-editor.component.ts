@@ -1,61 +1,75 @@
-import {Component, NgModule, OnInit} from '@angular/core';
+import { Component, NgModule, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {FormsModule, NgModel} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { ArticleService } from '../../services/article.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import {Article, ArticleDTO} from '../../models/article.model';
+import { Article, ArticleDTO } from '../../models/article.model';
 import { QuillModule } from 'ngx-quill';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-article-editor',
-  imports: [CommonModule, FormsModule,QuillModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    QuillModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatFormFieldModule
+  ],
   standalone: true,
   template: `
     <div class="container mx-auto p-4">
       <form (ngSubmit)="saveArticle()" class="max-w-2xl mx-auto">
-        <div class="mb-4">
-          <label class="block mb-2">Title</label>
+        <mat-form-field class="w-full mb-4">
+          <mat-label>Title</mat-label>
           <input
-              type="text"
-              [(ngModel)]="article.title"
-              name="title"
-              class="w-full p-2 border rounded"
-              required
+            matInput
+            type="text"
+            [(ngModel)]="article.title"
+            name="title"
+            required
           />
-        </div>
+        </mat-form-field>
 
-        <div class="mb-4">
-          <label class="block mb-2">Category</label>
-          <select
-              [(ngModel)]="article.category"
-              name="category"
-              class="w-full p-2 border rounded"
-              required
+        <mat-form-field class="w-full mb-4">
+          <mat-label>Category</mat-label>
+          <mat-select
+            [(ngModel)]="article.category"
+            name="category"
+            required
           >
-            <option value="news">News</option>
-            <option value="updates">Updates</option>
-            <option value="announcements">Announcements</option>
-          </select>
-        </div>
+            <mat-option value="news">News</mat-option>
+            <mat-option value="updates">Updates</mat-option>
+            <mat-option value="announcements">Announcements</mat-option>
+          </mat-select>
+        </mat-form-field>
 
         <div class="mb-4">
           <label class="block mb-2">Content</label>
-          <quill-editor name="content" [(ngModel)]="article.content"></quill-editor>
-
+          <quill-editor 
+            name="content" 
+            [(ngModel)]="article.content"
+          ></quill-editor>
         </div>
 
         <div class="flex gap-2">
           <button
-              type="submit"
-              (click)="saveArticle()"
-              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            mat-raised-button
+            color="primary"
+            type="submit"
           >
             Save as Draft
           </button>
           <button
-              type="button"
-              (click)="submitForReview()"
-              class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            mat-raised-button
+            color="accent"
+            type="button"
+            (click)="submitForReview()"
           >
             Submit for Review
           </button>

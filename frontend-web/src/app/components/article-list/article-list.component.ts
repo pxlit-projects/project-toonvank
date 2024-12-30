@@ -3,38 +3,69 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ArticleDTO } from "../../models/article.model";
 import { ArticleService } from "../../services/article.service";
-import {ArticleCardComponent} from "./article-card.component";
-import {CommentSectionComponent} from "./comment-section.component";
-import Swal from 'sweetalert2';
-import {NotificationService} from "../../services/notification.service";
+import { ArticleCardComponent } from "./article-card.component";
+import { CommentSectionComponent } from "./comment-section.component";
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: "app-article-list",
   standalone: true,
-  imports: [CommonModule, FormsModule, ArticleCardComponent, CommentSectionComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ArticleCardComponent,
+    CommentSectionComponent,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatFormFieldModule
+  ],
   template: `
     <div class="container mx-auto p-4">
       <div class="mb-4 flex gap-4">
-        <input
-            type="text"
-            [(ngModel)]="searchTerm"
-            placeholder="Search articles & authors..."
-            class="p-2 border rounded"
-        />
-        <select [(ngModel)]="selectedCategory" class="p-2 border rounded">
-          <option value="">All Categories</option>
-          <option value="news">News</option>
-          <option value="updates">Updates</option>
-          <option value="announcements">Announcements</option>
-        </select>
-        <select [(ngModel)]="selectedAuthor" class="p-2 border rounded">
-          <option value="" disabled>Select an author</option>
-          <option *ngFor="let author of uniqueAuthors" [ngValue]="author">
-            {{ author }}
-          </option>
-        </select>
-        <input type="date" [(ngModel)]="startDate" class="p-2 border rounded" />
-        <input type="date" [(ngModel)]="endDate" class="p-2 border rounded" />
+        <mat-form-field>
+          <mat-label>Search articles & authors</mat-label>
+          <input matInput [(ngModel)]="searchTerm">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Category</mat-label>
+          <mat-select [(ngModel)]="selectedCategory">
+            <mat-option value="">All Categories</mat-option>
+            <mat-option value="news">News</mat-option>
+            <mat-option value="updates">Updates</mat-option>
+            <mat-option value="announcements">Announcements</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Author</mat-label>
+          <mat-select [(ngModel)]="selectedAuthor">
+            <mat-option value="" disabled>Select an author</mat-option>
+            <mat-option *ngFor="let author of uniqueAuthors" [value]="author">
+              {{ author }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Start date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>End date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate">
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
       </div>
 
       <div class="grid gap-4">
@@ -42,7 +73,9 @@ import {NotificationService} from "../../services/notification.service";
         <app-article-card
             *ngFor="let article of filteredArticles; trackBy: trackByArticleId"
             [article]="article"
-        ><app-comment-section [articleId]="article.id"></app-comment-section></app-article-card>
+        >
+          <app-comment-section [articleId]="article.id"></app-comment-section>
+        </app-article-card>
       </div>
     </div>
   `,

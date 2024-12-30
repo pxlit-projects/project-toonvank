@@ -1,63 +1,86 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import {FormsModule} from "@angular/forms";
-import {UserRole} from "../../services/authentication/user-roles.enum";
-import {CommonModule} from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { UserRole } from "../../services/authentication/user-roles.enum";
+import { CommonModule } from "@angular/common";
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
     selector: 'login',
-    imports: [CommonModule, FormsModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatCardModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatFormFieldModule
+    ],
     standalone: true,
     template: `
         <div class="min-h-screen bg-gray-100 flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg shadow-md w-96">
-                <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h1>
+            <mat-card class="p-8 w-96">
+                <mat-card-header>
+                    <mat-card-title class="text-2xl font-bold mb-6 text-center">Login</mat-card-title>
+                </mat-card-header>
 
-                <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-6">
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
-                            Naam
-                        </label>
-                        <input
+                <mat-card-content>
+                    <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-6">
+                        <mat-form-field class="w-full">
+                            <mat-label>Naam</mat-label>
+                            <input
+                                matInput
                                 type="text"
                                 id="name"
                                 name="name"
                                 [(ngModel)]="userName"
                                 required
-                                class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Voer uw naam in"
-                        />
-                    </div>
+                            />
+                        </mat-form-field>
 
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="role">
-                            Selecteer uw rol
-                        </label>
-                        <select
+                        <mat-form-field class="w-full">
+                            <mat-label>Selecteer uw rol</mat-label>
+                            <mat-select
                                 id="role"
                                 name="role"
                                 [(ngModel)]="selectedRole"
                                 required
-                                class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option [ngValue]="null" disabled>Kies een rol...</option>
-                            <option [value]="UserRole.Gebruiker">Gebruiker</option>
-                            <option [value]="UserRole.Redacteur">Redacteur</option>
-                            <option [value]="UserRole.Hoofdredacteur">Hoofdredacteur</option>
-                        </select>
-                    </div>
+                            >
+                                <mat-option [value]="null" disabled>Kies een rol...</mat-option>
+                                <mat-option [value]="UserRole.Gebruiker">Gebruiker</mat-option>
+                                <mat-option [value]="UserRole.Redacteur">Redacteur</mat-option>
+                                <mat-option [value]="UserRole.Hoofdredacteur">Hoofdredacteur</mat-option>
+                            </mat-select>
+                        </mat-form-field>
 
-                    <button
+                        <button
+                            mat-raised-button
+                            color="primary"
                             type="submit"
                             [disabled]="!loginForm.form.valid"
-                            class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                    >
-                        Inloggen
-                    </button>
-                </form>
-            </div>
+                            class="w-full"
+                        >
+                            Inloggen
+                        </button>
+                    </form>
+                </mat-card-content>
+            </mat-card>
         </div>
-    `
+    `,
+    styles: [`
+        :host {
+            display: block;
+            height: 100vh;
+        }
+        mat-form-field {
+            width: 100%;
+        }
+    `]
 })
 export class LoginComponent {
     roleOptions = Object.values(UserRole);

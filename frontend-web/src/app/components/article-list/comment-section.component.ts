@@ -1,80 +1,108 @@
-import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { CommentService } from "../../services/comment.service";
 import { Comment, CommentDTO } from "../../models/comment.model";
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: "app-comment-section",
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatInputModule,
+        MatButtonModule,
+        MatCardModule,
+        MatIconModule
+    ],
     template: `
-    <div *ngIf="comments.length; else noComments">
-      <div *ngFor="let comment of comments" class="border p-4 rounded shadow-sm">
-        <div *ngIf="editingCommentId === comment.id; else viewMode">
-          <textarea
-            [(ngModel)]="editableCommentContent"
-            rows="3"
-            class="w-full p-2 border rounded"
-          ></textarea>
-          <div class="flex gap-2 mt-2">
-            <button
-              (click)="saveEdit(comment)"
-              class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-            >
-              Save
-            </button>
-            <button
-              (click)="cancelEdit()"
-              class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
+    <div *ngIf="comments.length; else noComments" class="w-full">
+      <mat-card *ngFor="let comment of comments" class="mb-4 w-full">
+        <mat-card-content>
+          <div *ngIf="editingCommentId === comment.id; else viewMode">
+            <mat-form-field class="w-full">
+              <textarea
+                matInput
+                [(ngModel)]="editableCommentContent"
+                rows="3"
+                placeholder="Edit comment"
+              ></textarea>
+            </mat-form-field>
+            <div class="flex gap-2">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="saveEdit(comment)"
+              >
+                <mat-icon>save</mat-icon>
+                Save
+              </button>
+              <button
+                mat-raised-button
+                (click)="cancelEdit()"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
-        <ng-template #viewMode>
-          <p>{{ comment.content }}</p>
-          <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
-          <div class="flex gap-2 mt-2">
-            <button
-              (click)="startEdit(comment)"
-              class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-            >
-              Edit
-            </button>
-            <button
-              (click)="deleteComment(comment)"
-              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-            >
-              Delete
-            </button>
-          </div>
-        </ng-template>
-      </div>
+          <ng-template #viewMode>
+            <p>{{ comment.content }}</p>
+            <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
+            <div class="flex gap-2 mt-2">
+              <button
+                mat-icon-button
+                color="accent"
+                (click)="startEdit(comment)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteComment(comment)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
     </div>
     <ng-template #noComments>
       <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
     </ng-template>
 
-    <div *ngIf="isAllowedToAdd" class="mt-4">
-      <div class="flex gap-4">
+    <div *ngIf="isAllowedToAdd" class="mt-4 w-full flex items-center gap-4">
+      <mat-form-field class="flex-grow">
         <input
-          type="text"
+          matInput
           [(ngModel)]="newComment"
           (ngModelChange)="onInputChange($event)"
           placeholder="Add a comment..."
-          class="flex-1 p-2 border rounded"
           (keyup.enter)="addComment()"
         />
-        <button *ngIf="isAllowedToPost"
-          (click)="addComment()"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Post
-        </button>
-      </div>
+      </mat-form-field>
+      <button
+        *ngIf="isAllowedToPost"
+        mat-raised-button
+        color="primary"
+        (click)="addComment()"
+        class="h-14"
+      >
+        Post
+      </button>
     </div>
   `,
+    styles: [`
+    :host {
+      width: 100%;
+      display: block;
+    }
+  `]
 })
 export class CommentSectionComponent implements OnInit {
     @Input() articleId!: number;

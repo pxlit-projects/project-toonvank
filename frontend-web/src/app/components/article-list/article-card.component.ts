@@ -1,23 +1,38 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArticleDTO } from '../../models/article.model';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
     selector: 'app-article-card',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, MatCardModule],
     template: `
-        <div class="border p-4 rounded shadow-sm">
-            <h3 class="text-xl font-bold">{{ article.title }}</h3>
-            <p class="text-gray-600">Category: {{ article.category }}</p>
-            <p class="mt-2" [innerHTML]="article.content"></p>
-            <p class="text-sm text-gray-500 mt-2">
-                Last updated: {{ article.updatedAt | date: 'medium' }}
-            </p>
-
-            <ng-content></ng-content>
-        </div>
-    `
+        <mat-card class="w-full">
+            <mat-card-header>
+                <mat-card-title>{{ article.title }}</mat-card-title>
+                <mat-card-subtitle>Category: {{ article.category }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <p [innerHTML]="article.content"></p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Last updated: {{ article.updatedAt | date: 'medium' }}
+                </p>
+            </mat-card-content>
+            <mat-card-actions class="px-4 w-full">
+                <ng-content></ng-content>
+            </mat-card-actions>
+        </mat-card>
+    `,
+    styles: [`
+        :host {
+            display: block;
+            width: 100%;
+        }
+        mat-card-actions {
+            padding: 16px;
+        }
+    `]
 })
 export class ArticleCardComponent {
     @Input() article!: ArticleDTO;

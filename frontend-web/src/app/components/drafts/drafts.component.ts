@@ -5,13 +5,23 @@ import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
 import { ArticleDTO } from '../../models/article.model';
 import { ReviewDTO } from '../../models/review.model';
-import {CommentSectionComponent} from "../article-list/comment-section.component";
-import {ReviewStatus} from "../../models/review.model";
-import {NotificationService} from "../../services/notification.service";
+import { CommentSectionComponent } from "../article-list/comment-section.component";
+import { ReviewStatus } from "../../models/review.model";
+import { NotificationService } from "../../services/notification.service";
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-drafts',
-  imports: [CommonModule, RouterModule, CommentSectionComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CommentSectionComponent,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule
+  ],
   standalone: true,
   template: `
     <div class="container mx-auto p-4">
@@ -20,100 +30,111 @@ import {NotificationService} from "../../services/notification.service";
       <p *ngIf="drafts.length === 0" class="text-gray-600">
         No drafts found.
       </p>
-      <div *ngFor="let draft of drafts; trackBy: trackByArticleId" class="mb-4">
-        <div class="border p-4 rounded shadow-sm">
-          <h3 class="text-xl font-bold">{{ draft.title }}</h3>
-          <p class="text-gray-600">Category: {{ draft.category }}</p>
+      <mat-card *ngFor="let draft of drafts; trackBy: trackByArticleId" class="mb-4">
+        <mat-card-header>
+          <mat-card-title>{{ draft.title }}</mat-card-title>
+          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
           <p class="mt-2" [innerHTML]="draft.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-
-          <div class="mt-4 flex gap-2">
-            <a
-                [routerLink]="['/editor']"
-                [queryParams]="{ id: draft.id }"
-                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Edit Draft
-            </a>
-            <button
-                (click)="submitForReview(draft)"
-                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Submit for Review
-            </button>
-            <button
-                (click)="deleteDraft(draft.id)"
-                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+        <mat-card-actions class="mt-4 flex gap-2">
+          <a mat-raised-button
+             color="primary"
+             [routerLink]="['/editor']"
+             [queryParams]="{ id: draft.id }">
+            <mat-icon>edit</mat-icon> Edit Draft
+          </a>
+          <button mat-raised-button
+                  color="accent"
+                  (click)="submitForReview(draft)">
+            <mat-icon>send</mat-icon> Submit for Review
+          </button>
+          <button mat-raised-button
+                  color="warn"
+                  (click)="deleteDraft(draft.id)">
+            <mat-icon>delete</mat-icon> Delete
+          </button>
+        </mat-card-actions>
+      </mat-card>
 
       <h2 *ngIf="rejected.length > 0" class="text-2xl font-bold mb-4">Rejected Posts</h2>
-      <div *ngFor="let draft of rejected; trackBy: trackByArticleId" class="mb-4">
-        <div class="border p-4 rounded shadow-sm">
-          <h3 class="text-xl font-bold">{{ draft.title }}</h3>
-          <p class="text-gray-600">Category: {{ draft.category }}</p>
-          <p class="mt-2"  [innerHTML]="draft.content"></p>
+      <mat-card *ngFor="let draft of rejected; trackBy: trackByArticleId" class="mb-4">
+        <mat-card-header>
+          <mat-card-title>{{ draft.title }}</mat-card-title>
+          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="mt-2" [innerHTML]="draft.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
           <div *ngFor="let review of reviews; trackBy: trackByReviewId">
             <div *ngIf="review.postId == draft.id && review.status === 'REJECTED'">
-              <p class="text-sm text-red-500 mt-2">Reason for rejection: {{ review.comment || 'No reason provided' }} (reviewed at {{ review.reviewedAt | date: 'medium' }})</p>
+              <p class="text-sm text-red-500 mt-2">
+                Reason for rejection: {{ review.comment || 'No reason provided' }}
+                (reviewed at {{ review.reviewedAt | date: 'medium' }})
+              </p>
             </div>
           </div>
-          <div class="mt-4 flex gap-2">
-            <a
-                [routerLink]="['/editor']"
-                [queryParams]="{ id: draft.id }"
-                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Edit Post
-            </a>
-            <button
-                (click)="submitForReview(draft)"
-                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Resubmit for Review
-            </button>
-            <button
-                (click)="deleteDraft(draft.id)"
-                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Delete Post
-            </button>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+        <mat-card-actions class="mt-4 flex gap-2">
+          <a mat-raised-button
+             color="primary"
+             [routerLink]="['/editor']"
+             [queryParams]="{ id: draft.id }">
+            <mat-icon>edit</mat-icon> Edit Post
+          </a>
+          <button mat-raised-button
+                  color="accent"
+                  (click)="submitForReview(draft)">
+            <mat-icon>refresh</mat-icon> Resubmit for Review
+          </button>
+          <button mat-raised-button
+                  color="warn"
+                  (click)="deleteDraft(draft.id)">
+            <mat-icon>delete</mat-icon> Delete Post
+          </button>
+        </mat-card-actions>
+      </mat-card>
 
       <h2 *ngIf="pending.length > 0" class="text-2xl font-bold mb-4">Pending Posts</h2>
-      <div *ngFor="let draft of pending; trackBy: trackByArticleId" class="mb-4">
-        <div class="border p-4 rounded shadow-sm">
-          <h3 class="text-xl font-bold">{{ draft.title }}</h3>
-          <p class="text-gray-600">Category: {{ draft.category }}</p>
+      <mat-card *ngFor="let draft of pending; trackBy: trackByArticleId" class="mb-4">
+        <mat-card-header>
+          <mat-card-title>{{ draft.title }}</mat-card-title>
+          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
           <p class="mt-2" [innerHTML]="draft.content"></p>
           <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-
-          <div class="mt-4 flex gap-2">
-            <a
-                [routerLink]="['/editor']"
-                [queryParams]="{ id: draft.id }"
-                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Edit Draft
-            </a>
-            <button
-                (click)="deleteDraft(draft.id)"
-                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+        <mat-card-actions class="mt-4 flex gap-2">
+          <a mat-raised-button
+             color="primary"
+             [routerLink]="['/editor']"
+             [queryParams]="{ id: draft.id }">
+            <mat-icon>edit</mat-icon> Edit Draft
+          </a>
+          <button mat-raised-button
+                  color="warn"
+                  (click)="deleteDraft(draft.id)">
+            <mat-icon>delete</mat-icon> Delete
+          </button>
+        </mat-card-actions>
+      </mat-card>
     </div>
-  `
+  `,
+  styles: [`
+    mat-card {
+      margin-bottom: 16px;
+    }
+    mat-card-content {
+      padding: 16px;
+    }
+    mat-card-actions {
+      padding: 16px;
+      margin: 0;
+    }
+  `]
 })
 export class DraftsComponent implements OnInit {
   drafts: ArticleDTO[] = [];

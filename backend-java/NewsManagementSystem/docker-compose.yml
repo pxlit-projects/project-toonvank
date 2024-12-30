@@ -1,157 +1,157 @@
-# version: "3.3"
+version: "3.3"
 
-# services:
-#   rabbitmq:
-#     image: rabbitmq:3-management-alpine
-#     container_name: rabbitmq
-#     ports:
-#       - "5672:5672"
-#       - "15672:15672"
-#     healthcheck:
-#       test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-#       interval: 30s
-#       timeout: 30s
-#       retries: 3
-#     networks:
-#       - spring-cloud-network
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - spring-cloud-network
 
-#   commentservicedb:
-#     container_name: commentservicedb
-#     image: mysql:latest
-#     ports:
-#       - "3306:3306"
-#     environment:
-#       MYSQL_DATABASE: "commentservice_db"
-#       MYSQL_USER: "admin"
-#       MYSQL_PASSWORD: "admin"
-#       MYSQL_ROOT_PASSWORD: "root"
-#     networks:
-#       - spring-cloud-network
+  commentservicedb:
+    container_name: commentservicedb
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "commentservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
 
-#   postservicedb:
-#     container_name: postservicedb
-#     image: mysql:latest
-#     ports:
-#       - "3307:3306"
-#     environment:
-#       MYSQL_DATABASE: "postservice_db"
-#       MYSQL_USER: "admin"
-#       MYSQL_PASSWORD: "admin"
-#       MYSQL_ROOT_PASSWORD: "root"
-#     networks:
-#       - spring-cloud-network
+  postservicedb:
+    container_name: postservicedb
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: "postservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
 
-#   reviewservicedb:
-#     container_name: reviewservicedb
-#     image: mysql:latest
-#     ports:
-#       - "3308:3306"
-#     environment:
-#       MYSQL_DATABASE: "reviewservice_db"
-#       MYSQL_USER: "admin"
-#       MYSQL_PASSWORD: "admin"
-#       MYSQL_ROOT_PASSWORD: "root"
-#     networks:
-#       - spring-cloud-network
-#     healthcheck:
-#       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-padmin" ]
-#       interval: 5s
-#       timeout: 3s
-#       retries: 10
+  reviewservicedb:
+    container_name: reviewservicedb
+    image: mysql:latest
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: "reviewservice_db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - spring-cloud-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-padmin" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-#   config-service:
-#     build:
-#       context: .
-#       dockerfile: ./config-service/Dockerfile
-#     ports:
-#       - "8088:8088"
-#     networks:
-#       - spring-cloud-network
-#     healthcheck:
-#       test: [ "CMD", "curl", "-f", "http://localhost:8088/discovery-service/default" ]
-#       interval: 5s
-#       timeout: 3s
-#       retries: 10
+  config-service:
+    build:
+      context: .
+      dockerfile: ./config-service/Dockerfile
+    ports:
+      - "8088:8088"
+    networks:
+      - spring-cloud-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8088/discovery-service/default" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-#   discovery-service:
-#     container_name: discovery-service
-#     build:
-#       context: .
-#       dockerfile: ./discovery-service/Dockerfile
-#     ports:
-#       - "8061:8061"
-#     depends_on:
-#       config-service:
-#         condition: service_healthy
-#     networks:
-#       - spring-cloud-network
+  discovery-service:
+    container_name: discovery-service
+    build:
+      context: .
+      dockerfile: ./discovery-service/Dockerfile
+    ports:
+      - "8061:8061"
+    depends_on:
+      config-service:
+        condition: service_healthy
+    networks:
+      - spring-cloud-network
 
-#   messaging-service:
-#     build:
-#       context: ./
-#       dockerfile: ./messaging-service/Dockerfile
-#     ports:
-#       - "8079:8079"
-#     depends_on:
-#       rabbitmq:
-#         condition: service_healthy
-#       discovery-service:
-#         condition: service_started
-#     networks:
-#       - spring-cloud-network
+  messaging-service:
+    build:
+      context: ./
+      dockerfile: ./messaging-service/Dockerfile
+    ports:
+      - "8079:8079"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks:
+      - spring-cloud-network
 
-#   review-service:
-#     container_name: review-service
-#     build:
-#       context: ./
-#       dockerfile: ./review-service/Dockerfile
-#     ports:
-#       - "8085:8085"
-#     depends_on:
-#       discovery-service:
-#         condition: service_started
-#       reviewservicedb:
-#         condition: service_healthy
-#       rabbitmq:
-#         condition: service_healthy
-#     networks:
-#       - spring-cloud-network
+  review-service:
+    container_name: review-service
+    build:
+      context: ./
+      dockerfile: ./review-service/Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      reviewservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - spring-cloud-network
 
-#   post-service:
-#     build:
-#       context: ./
-#       dockerfile: ./post-service/Dockerfile
-#     ports:
-#       - "8084:8084"
-#     depends_on:
-#       - discovery-service
-#       - postservicedb
-#       - rabbitmq
-#     networks:
-#       - spring-cloud-network
+  post-service:
+    build:
+      context: ./
+      dockerfile: ./post-service/Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      - discovery-service
+      - postservicedb
+      - rabbitmq
+    networks:
+      - spring-cloud-network
 
-#   comment-service:
-#     build:
-#       context: ./
-#       dockerfile: ./comment-service/Dockerfile
-#     ports:
-#       - "8083:8083"
-#     depends_on:
-#       - discovery-service
-#       - commentservicedb
-#     networks:
-#       - spring-cloud-network
+  comment-service:
+    build:
+      context: ./
+      dockerfile: ./comment-service/Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discovery-service
+      - commentservicedb
+    networks:
+      - spring-cloud-network
 
-#   gateway-service:
-#     build:
-#       context: ./
-#       dockerfile: ./gateway-service/Dockerfile
-#     ports:
-#       - "8086:8086"
-#     depends_on:
-#       - discovery-service
-#     networks:
-#       - spring-cloud-network
-# networks:
-#   spring-cloud-network:
-#     driver: bridge
+  gateway-service:
+    build:
+      context: ./
+      dockerfile: ./gateway-service/Dockerfile
+    ports:
+      - "8086:8086"
+    depends_on:
+      - discovery-service
+    networks:
+      - spring-cloud-network
+networks:
+  spring-cloud-network:
+    driver: bridge
