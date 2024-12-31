@@ -12,10 +12,8 @@ declare const require: {
     };
 };
 
+// Initialize the Angular testing environment
 getTestBed().initTestEnvironment(
     BrowserDynamicTestingModule,
     platformBrowserDynamicTesting(),
 );
-
-const context = require.context('./', true, /\.spec\.ts$/);
-context.keys().forEach(context);

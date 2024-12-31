@@ -5,7 +5,6 @@ import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
 import { ArticleDTO } from '../../models/article.model';
 import { ReviewDTO } from '../../models/review.model';
-import { CommentSectionComponent } from "../article-list/comment-section.component";
 import { ReviewStatus } from "../../models/review.model";
 import { NotificationService } from "../../services/notification.service";
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +16,6 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     CommonModule,
     RouterModule,
-    CommentSectionComponent,
     MatCardModule,
     MatButtonModule,
     MatIconModule
