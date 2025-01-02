@@ -86,10 +86,10 @@ services:
     networks:
       - spring-cloud-network
 
-  messaging-service:
+  notification-service:
     build:
       context: ./
-      dockerfile: ./messaging-service/Dockerfile
+      dockerfile: ./notification-service/Dockerfile
     ports:
       - "8079:8079"
     depends_on:

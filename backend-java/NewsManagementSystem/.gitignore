@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.env
+notification-service.properties
+messaging-service.properties

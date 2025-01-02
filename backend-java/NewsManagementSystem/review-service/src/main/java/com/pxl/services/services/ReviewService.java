@@ -1,6 +1,8 @@
 package com.pxl.services.services;
 
+import com.pxl.services.client.NotificationClient;
 import com.pxl.services.domain.DTO.ReviewDTO;
+import com.pxl.services.domain.NotificationRequest;
 import com.pxl.services.domain.Review;
 import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.ReviewRepository;
@@ -22,12 +24,23 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final NotificationClient notificationClient;
 
     public Review createReview(Review review) {
         log.info("Creating review: {}", review);
         review.setId(null);
         ReviewDTO reviewDTO = new ReviewDTO(review.getPostId(), review.getStatus(), review.getComment(), review.getReviewedAt());
         rabbitTemplate.convertAndSend("reviewQueue", reviewDTO);
+
+        if (review.getStatus() == ReviewStatus.APPROVED || review.getStatus() == ReviewStatus.REJECTED || review.getStatus() == ReviewStatus.PUBLISHED) {
+            NotificationRequest notificationRequest = NotificationRequest.builder()
+                    .to("notifications@toonvank.online")
+                    .subject("New Review Received")
+                    .text("You've received a new review on post " + review.getPostId() + " with status " + review.getStatus().toString().toLowerCase() + ".")
+                    .build();
+
+            notificationClient.sendNotification(notificationRequest);
+        }
         return reviewRepository.save(review);
     }
 

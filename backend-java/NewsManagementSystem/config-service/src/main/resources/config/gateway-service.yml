@@ -41,6 +41,14 @@ spring:
           filters:
             - RewritePath=/review/(?<path>.*), /$\{path}
 
+        # Notification Service Route
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/**
+          filters:
+            - RewritePath=/notification/(?<path>.*), /$\{path}
+
         # Gateway Service Route
         - id: notification-service
           uri: lb://notification-service
