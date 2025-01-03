@@ -65,7 +65,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
                             [disabled]="!loginForm.form.valid"
                             class="w-full"
                         >
-                            Inloggen
+                            Log in
                         </button>
                     </form>
                 </mat-card-content>
@@ -84,10 +84,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 })
 export class LoginComponent {
     roleOptions = Object.values(UserRole);
-    selectedRole: UserRole = UserRole.Gebruiker;
-    userName = '';
+    selectedRole: UserRole;
+    userName: string;
 
-    constructor(private router: Router) {}
+    constructor(private router: Router) {
+        const savedRole = localStorage.getItem('userRole') as UserRole;
+        const savedName = localStorage.getItem('userName');
+
+        this.selectedRole = savedRole || UserRole.Gebruiker;
+        this.userName = savedName || '';
+    }
 
     login() {
         localStorage.setItem('userRole', this.selectedRole);

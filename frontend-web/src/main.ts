@@ -80,13 +80,17 @@ const routes: Routes = [
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-sm">({{ userRole?.toString() }})</span>
+          <span class="text-sm">{{ userRole?.toString() }}</span>
+          
           @if (!userRole) {
             <a mat-button routerLink="/login">
               <mat-icon>login</mat-icon>
               Login
             </a>
           } @else {
+            <button mat-icon-button routerLink="/login" title="Switch User">
+              <mat-icon>switch_account</mat-icon>
+            </button>
             <button mat-button (click)="logout()">
               <mat-icon>logout</mat-icon>
               Logout
