@@ -33,5 +33,4 @@ build/
 .vscode/
 
 .env
-notification-service.properties
-messaging-service.properties
+**/config/*.properties
