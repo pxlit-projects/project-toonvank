@@ -1,6 +1,10 @@
 package com.pxl.services;
 
 import com.pxl.services.domain.Comment;
+import com.pxl.services.exceptions.CommentCreationException;
+import com.pxl.services.exceptions.CommentDeletionException;
+import com.pxl.services.exceptions.CommentNotFoundException;
+import com.pxl.services.exceptions.CommentUpdateException;
 import com.pxl.services.repository.CommentRepository;
 import com.pxl.services.services.CommentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,26 +46,31 @@ class CommentServiceTest {
 
     @Test
     void createComment_Success() {
-        // Arrange
         when(commentRepository.save(testComment)).thenReturn(testComment);
 
-        // Act
         Comment createdComment = commentService.createComment(testComment);
 
-        // Assert
         assertEquals(testComment, createdComment);
         verify(commentRepository).save(testComment);
     }
 
     @Test
-    void getCommentById_Exists() {
-        // Arrange
+    void createComment_Failure() {
+        when(commentRepository.save(testComment)).thenThrow(new RuntimeException("Database error"));
+
+        CommentCreationException exception = assertThrows(CommentCreationException.class,
+                () -> commentService.createComment(testComment));
+
+        assertEquals("Failed to create comment: Database error", exception.getMessage());
+        verify(commentRepository).save(testComment);
+    }
+
+    @Test
+    void getCommentById_Success() {
         when(commentRepository.findById(1L)).thenReturn(Optional.of(testComment));
 
-        // Act
         Optional<Comment> foundComment = commentService.getCommentById(1L);
 
-        // Assert
         assertTrue(foundComment.isPresent());
         assertEquals(testComment, foundComment.get());
         verify(commentRepository).findById(1L);
@@ -69,20 +78,17 @@ class CommentServiceTest {
 
     @Test
     void getCommentById_NotFound() {
-        // Arrange
         when(commentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Comment> foundComment = commentService.getCommentById(1L);
+        CommentNotFoundException exception = assertThrows(CommentNotFoundException.class,
+                () -> commentService.getCommentById(1L));
 
-        // Assert
-        assertFalse(foundComment.isPresent());
+        assertEquals("Comment not found with ID: 1", exception.getMessage());
         verify(commentRepository).findById(1L);
     }
 
     @Test
     void getCommentsByPostId_Success() {
-        // Arrange
         List<Comment> postComments = Arrays.asList(testComment,
                 Comment.builder()
                         .id(2L)
@@ -92,17 +98,25 @@ class CommentServiceTest {
 
         when(commentRepository.findByPostId(100L)).thenReturn(postComments);
 
-        // Act
         List<Comment> foundComments = commentService.getCommentsByPostId(100L);
 
-        // Assert
         assertEquals(2, foundComments.size());
         verify(commentRepository).findByPostId(100L);
     }
 
     @Test
+    void getCommentsByPostId_Failure() {
+        when(commentRepository.findByPostId(100L)).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> commentService.getCommentsByPostId(100L));
+
+        assertEquals("Failed to retrieve comments for post ID 100: Database error", exception.getMessage());
+        verify(commentRepository).findByPostId(100L);
+    }
+
+    @Test
     void updateComment_Success() {
-        // Arrange
         String newContent = "Updated comment content";
         when(commentRepository.findById(1L)).thenReturn(Optional.of(testComment));
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> {
@@ -111,10 +125,8 @@ class CommentServiceTest {
             return savedComment;
         });
 
-        // Act
         Comment updatedComment = commentService.updateComment(1L, newContent);
 
-        // Assert
         assertEquals(newContent, updatedComment.getContent());
         assertNotNull(updatedComment.getEditedAt());
         verify(commentRepository).findById(1L);
@@ -123,43 +135,64 @@ class CommentServiceTest {
 
     @Test
     void updateComment_NotFound() {
-        // Arrange
         String newContent = "Updated comment content";
         when(commentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        CommentNotFoundException exception = assertThrows(CommentNotFoundException.class,
                 () -> commentService.updateComment(1L, newContent));
 
         assertEquals("Comment not found with ID: 1", exception.getMessage());
         verify(commentRepository).findById(1L);
+        verify(commentRepository, never()).save(any());
+    }
+
+    @Test
+    void updateComment_SaveFailure() {
+        String newContent = "Updated comment content";
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(testComment));
+        when(commentRepository.save(any(Comment.class))).thenThrow(new RuntimeException("Database error"));
+
+        CommentUpdateException exception = assertThrows(CommentUpdateException.class,
+                () -> commentService.updateComment(1L, newContent));
+
+        assertEquals("Failed to update comment: Database error", exception.getMessage());
+        verify(commentRepository).findById(1L);
+        verify(commentRepository).save(any());
     }
 
     @Test
     void deleteComment_Success() {
-        // Arrange
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(testComment));
+        when(commentRepository.existsById(1L)).thenReturn(true);
         doNothing().when(commentRepository).deleteById(1L);
 
-        // Act
-        commentService.deleteComment(1L);
+        assertDoesNotThrow(() -> commentService.deleteComment(1L));
 
-        // Assert
-        verify(commentRepository).findById(1L);
+        verify(commentRepository).existsById(1L);
         verify(commentRepository).deleteById(1L);
     }
 
     @Test
     void deleteComment_NotFound() {
-        // Arrange
-        when(commentRepository.findById(1L)).thenReturn(Optional.empty());
+        when(commentRepository.existsById(1L)).thenReturn(false);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        CommentNotFoundException exception = assertThrows(CommentNotFoundException.class,
                 () -> commentService.deleteComment(1L));
 
         assertEquals("Comment not found with ID: 1", exception.getMessage());
-        verify(commentRepository).findById(1L);
-        verify(commentRepository, never()).deleteById(1L);
+        verify(commentRepository).existsById(1L);
+        verify(commentRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteComment_DeletionFailure() {
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        doThrow(new RuntimeException("Database error")).when(commentRepository).deleteById(1L);
+
+        CommentDeletionException exception = assertThrows(CommentDeletionException.class,
+                () -> commentService.deleteComment(1L));
+
+        assertEquals("Failed to delete comment: Database error", exception.getMessage());
+        verify(commentRepository).existsById(1L);
+        verify(commentRepository).deleteById(1L);
     }
 }
