@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
-import { ArticleDTO } from '../../models/article.model';
-import { ReviewDTO } from '../../models/review.model';
-import { ReviewStatus } from "../../models/review.model";
-import { NotificationService } from "../../services/notification.service";
+import { NotificationService } from '../../services/notification.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { ArticleDTO } from '../../models/article.model';
+import { ReviewDTO } from '../../models/review.model';
+import { ReviewStatus } from '../../models/review.model';
+
 @Component({
   selector: 'app-drafts',
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -20,105 +22,119 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatIconModule
   ],
-  standalone: true,
   template: `
     <div class="container mx-auto p-4">
-      <h2 class="text-2xl font-bold mb-4">My Drafts</h2>
+      @if (drafts().length === 0) {
+        <p class="text-gray-600">No drafts found.</p>
+      }
 
-      <p *ngIf="drafts.length === 0" class="text-gray-600">
-        No drafts found.
-      </p>
-      <mat-card *ngFor="let draft of drafts; trackBy: trackByArticleId" class="mb-4">
-        <mat-card-header>
-          <mat-card-title>{{ draft.title }}</mat-card-title>
-          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="mt-2" [innerHTML]="draft.content"></p>
-          <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-        </mat-card-content>
-        <mat-card-actions class="mt-4 flex gap-2">
-          <a mat-raised-button
-             color="primary"
-             [routerLink]="['/editor']"
-             [queryParams]="{ id: draft.id }">
-            <mat-icon>edit</mat-icon> Edit Draft
-          </a>
-          <button mat-raised-button
-                  color="accent"
-                  (click)="submitForReview(draft)">
-            <mat-icon>send</mat-icon> Submit for Review
-          </button>
-          <button mat-raised-button
-                  color="warn"
-                  (click)="deleteDraft(draft.id)">
-            <mat-icon>delete</mat-icon> Delete
-          </button>
-        </mat-card-actions>
-      </mat-card>
+      @for (draft of drafts(); track draft.id) {
+        <mat-card class="mb-4">
+          <mat-card-header>
+            <mat-card-title>{{ draft.title }}</mat-card-title>
+            <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="mt-2" [innerHTML]="draft.content"></p>
+            <p class="text-sm text-gray-500 mt-2">
+              Last updated: {{ draft.updatedAt | date: 'medium' }}
+            </p>
+          </mat-card-content>
+          <mat-card-actions class="mt-4 flex gap-2">
+            <a mat-raised-button
+               color="primary"
+               [routerLink]="['/editor']"
+               [queryParams]="{ id: draft.id }">
+              <mat-icon>edit</mat-icon> Edit Draft
+            </a>
+            <button mat-raised-button
+                    color="accent"
+                    (click)="submitForReview(draft)">
+              <mat-icon>send</mat-icon> Submit for Review
+            </button>
+            <button mat-raised-button
+                    color="warn"
+                    (click)="deleteDraft(draft.id)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
 
-      <h2 *ngIf="rejected.length > 0" class="text-2xl font-bold mb-4">Rejected Posts</h2>
-      <mat-card *ngFor="let draft of rejected; trackBy: trackByArticleId" class="mb-4">
-        <mat-card-header>
-          <mat-card-title>{{ draft.title }}</mat-card-title>
-          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="mt-2" [innerHTML]="draft.content"></p>
-          <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-          <div *ngFor="let review of reviews; trackBy: trackByReviewId">
-            <div *ngIf="review.postId == draft.id && review.status === 'REJECTED'">
-              <p class="text-sm text-red-500 mt-2">
-                Reason for rejection: {{ review.comment || 'No reason provided' }}
-                (reviewed at {{ review.reviewedAt | date: 'medium' }})
+      @if (rejected().length > 0) {
+        <h2 class="text-2xl font-bold mb-4">Rejected Posts</h2>
+        @for (draft of rejected(); track draft.id) {
+          <mat-card class="mb-4">
+            <mat-card-header>
+              <mat-card-title>{{ draft.title }}</mat-card-title>
+              <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="mt-2" [innerHTML]="draft.content"></p>
+              <p class="text-sm text-gray-500 mt-2">
+                Last updated: {{ draft.updatedAt | date: 'medium' }}
               </p>
-            </div>
-          </div>
-        </mat-card-content>
-        <mat-card-actions class="mt-4 flex gap-2">
-          <a mat-raised-button
-             color="primary"
-             [routerLink]="['/editor']"
-             [queryParams]="{ id: draft.id }">
-            <mat-icon>edit</mat-icon> Edit Post
-          </a>
-          <button mat-raised-button
-                  color="accent"
-                  (click)="submitForReview(draft)">
-            <mat-icon>refresh</mat-icon> Resubmit for Review
-          </button>
-          <button mat-raised-button
-                  color="warn"
-                  (click)="deleteDraft(draft.id)">
-            <mat-icon>delete</mat-icon> Delete Post
-          </button>
-        </mat-card-actions>
-      </mat-card>
+              @for (review of reviews(); track review.id) {
+                @if (review.postId === draft.id && review.status === 'REJECTED') {
+                  <p class="text-sm text-red-500 mt-2">
+                    Reason for rejection: {{ review.comment || 'No reason provided' }}
+                    (reviewed at {{ review.reviewedAt | date: 'medium' }})
+                  </p>
+                }
+              }
+            </mat-card-content>
+            <mat-card-actions class="mt-4 flex gap-2">
+              <a mat-raised-button
+                 color="primary"
+                 [routerLink]="['/editor']"
+                 [queryParams]="{ id: draft.id }">
+                <mat-icon>edit</mat-icon> Edit Post
+              </a>
+              <button mat-raised-button
+                      color="accent"
+                      (click)="submitForReview(draft)">
+                <mat-icon>refresh</mat-icon> Resubmit for Review
+              </button>
+              <button mat-raised-button
+                      color="warn"
+                      (click)="deleteDraft(draft.id)">
+                <mat-icon>delete</mat-icon> Delete Post
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      }
 
-      <h2 *ngIf="pending.length > 0" class="text-2xl font-bold mb-4">Pending Posts</h2>
-      <mat-card *ngFor="let draft of pending; trackBy: trackByArticleId" class="mb-4">
-        <mat-card-header>
-          <mat-card-title>{{ draft.title }}</mat-card-title>
-          <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="mt-2" [innerHTML]="draft.content"></p>
-          <p class="text-sm text-gray-500 mt-2">Last updated: {{ draft.updatedAt | date: 'medium' }}</p>
-        </mat-card-content>
-        <mat-card-actions class="mt-4 flex gap-2">
-          <a mat-raised-button
-             color="primary"
-             [routerLink]="['/editor']"
-             [queryParams]="{ id: draft.id }">
-            <mat-icon>edit</mat-icon> Edit Draft
-          </a>
-          <button mat-raised-button
-                  color="warn"
-                  (click)="deleteDraft(draft.id)">
-            <mat-icon>delete</mat-icon> Delete
-          </button>
-        </mat-card-actions>
-      </mat-card>
+      @if (pending().length > 0) {
+        <h2 class="text-2xl font-bold mb-4">Pending Posts</h2>
+        @for (draft of pending(); track draft.id) {
+          <mat-card class="mb-4">
+            <mat-card-header>
+              <mat-card-title>{{ draft.title }}</mat-card-title>
+              <mat-card-subtitle>Category: {{ draft.category }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="mt-2" [innerHTML]="draft.content"></p>
+              <p class="text-sm text-gray-500 mt-2">
+                Last updated: {{ draft.updatedAt | date: 'medium' }}
+              </p>
+            </mat-card-content>
+            <mat-card-actions class="mt-4 flex gap-2">
+              <a mat-raised-button
+                 color="primary"
+                 [routerLink]="['/editor']"
+                 [queryParams]="{ id: draft.id }">
+                <mat-icon>edit</mat-icon> Edit Draft
+              </a>
+              <button mat-raised-button
+                      color="warn"
+                      (click)="deleteDraft(draft.id)">
+                <mat-icon>delete</mat-icon> Delete
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      }
     </div>
   `,
   styles: [`
@@ -135,12 +151,23 @@ import { MatIconModule } from '@angular/material/icon';
   `]
 })
 export class DraftsComponent implements OnInit {
-  drafts: ArticleDTO[] = [];
-  rejected: ArticleDTO[] = [];
-  pending: ArticleDTO[] = [];
-  reviews :ReviewDTO[] = [];
+  // Use signals for reactive state management
+  private draftsSignal = signal<ArticleDTO[]>([]);
+  private rejectedSignal = signal<ArticleDTO[]>([]);
+  private pendingSignal = signal<ArticleDTO[]>([]);
+  private reviewsSignal = signal<ReviewDTO[]>([]);
 
-  constructor(private articleService: ArticleService, private reviewService: ReviewService, private notificationService: NotificationService) {}
+  // Expose signals as getters
+  drafts = this.draftsSignal.asReadonly();
+  rejected = this.rejectedSignal.asReadonly();
+  pending = this.pendingSignal.asReadonly();
+  reviews = this.reviewsSignal.asReadonly();
+
+  constructor(
+      private articleService: ArticleService,
+      private reviewService: ReviewService,
+      private notificationService: NotificationService
+  ) {}
 
   ngOnInit() {
     this.loadDrafts();
@@ -150,32 +177,28 @@ export class DraftsComponent implements OnInit {
   }
 
   loadDrafts() {
-    this.articleService.getDraftArticles().subscribe(articles => {
-      this.drafts = articles;
-    });
+    const articles = this.articleService.getDraftArticles();
+    this.draftsSignal.set(articles);
   }
 
   loadRejectedArticles() {
-    this.articleService.getRejectedArticles().subscribe(articles => {
-      this.rejected = articles;
-    });
+    const articles = this.articleService.getRejectedArticles();
+    this.rejectedSignal.set(articles);
   }
 
   loadPendingArticles() {
-    this.articleService.getPendingArticles().subscribe(articles => {
-      this.pending = articles;
-    });
+    const articles = this.articleService.getPendingArticles();
+    this.pendingSignal.set(articles);
   }
 
   loadReviews() {
-      this.reviewService.getReviews().subscribe(reviews => {
-        this.reviews = reviews;
-      });
+    const reviews = this.reviewService.getReviews();
+    this.reviewsSignal.set(reviews);
   }
 
   submitForReview(article: ArticleDTO) {
     this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
-      next: (review) => {
+      next: () => {
         this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
         this.loadDrafts();
       },
@@ -201,13 +224,5 @@ export class DraftsComponent implements OnInit {
       this.articleService.deleteArticle(id);
       this.loadDrafts();
     }
-  }
-
-  trackByArticleId(index: number, article: ArticleDTO): number {
-    return article.id;
-  }
-
-  trackByReviewId(index: number, review: ReviewDTO): number {
-      return review.id;
   }
 }

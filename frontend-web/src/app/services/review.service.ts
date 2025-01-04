@@ -1,5 +1,5 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, catchError, throwError, tap, of } from 'rxjs';
+import { inject, Injectable, signal, computed } from '@angular/core';
+import { Observable, map, catchError, throwError, tap } from 'rxjs';
 import { Review, ReviewDTO, ReviewStatus } from '../models/review.model';
 import { HttpClient } from '@angular/common/http';
 import { ArticleService } from './article.service';
@@ -13,7 +13,7 @@ export class ReviewService {
   http: HttpClient = inject(HttpClient);
   private articleService: ArticleService = inject(ArticleService);
 
-  private reviews = new BehaviorSubject<ReviewDTO[]>([]);
+  private reviews = signal<ReviewDTO[]>([]);
 
   constructor() {
     this.loadReviews();
@@ -21,7 +21,7 @@ export class ReviewService {
 
   private loadReviews(): void {
     this.http.get<ReviewDTO[]>(this.endpoint).pipe(
-        tap((data) => this.reviews.next(data)),
+        tap((data) => this.reviews.set(data)),
         catchError(this.handleError<ReviewDTO[]>('loadReviews', []))
     ).subscribe();
   }
@@ -38,26 +38,20 @@ export class ReviewService {
     );
   }
 
-  getReviews(): Observable<ReviewDTO[]> {
-    return this.reviews.asObservable();
+  getReviews(): ReviewDTO[] {
+    return this.reviews();
   }
 
-  getPendingReviews(): Observable<ReviewDTO[]> {
-    return this.reviews.pipe(
-        map((reviews) => reviews.filter((review) => review.status === ReviewStatus.PENDING))
-    );
+  getPendingReviews(): ReviewDTO[] {
+    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.PENDING))();
   }
 
-  getApprovedReviews(): Observable<ReviewDTO[]> {
-    return this.reviews.pipe(
-        map((reviews) => reviews.filter((review) => review.status === ReviewStatus.APPROVED))
-    );
+  getApprovedReviews(): ReviewDTO[] {
+    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.APPROVED))();
   }
 
-  getRejectedReviews(): Observable<ReviewDTO[]> {
-    return this.reviews.pipe(
-        map((reviews) => reviews.filter((review) => review.status === ReviewStatus.REJECTED))
-    );
+  getRejectedReviews(): ReviewDTO[] {
+    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.REJECTED))();
   }
 
   createReview(review: Partial<Review>): Observable<Review> {

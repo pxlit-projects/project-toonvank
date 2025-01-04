@@ -105,9 +105,10 @@ export class ArticleListComponent {
       [...new Set(this.articles().map((article) => article.author))]
   );
 
-  // Computed filtered articles with reactive filtering
   filteredArticles = computed(() => {
     return this.articles().filter((article) => {
+      const isPublished = article.status === 'PUBLISHED';
+
       const matchesSearch =
           article.title.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
           article.content.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
@@ -124,16 +125,15 @@ export class ArticleListComponent {
       const matchesAuthor =
           !this.selectedAuthor() || article.author === this.selectedAuthor();
 
-      return matchesSearch && matchesCategory && matchesDate && matchesAuthor;
+      return isPublished && matchesSearch && matchesCategory && matchesDate && matchesAuthor;
     });
   });
 
   constructor() {
     // Use effect for loading articles
     effect(() => {
-      this.articleService.getArticles().subscribe((articles) => {
-        this.articles.set(articles);
-      });
+      const articles = this.articleService.getArticles();
+      this.articles.set(articles);
     });
   }
 }

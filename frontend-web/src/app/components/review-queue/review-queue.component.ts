@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
@@ -6,9 +6,9 @@ import { ArticleDTO } from '../../models/article.model';
 import { ReviewStatus } from '../../models/review.model';
 import { ArticleCardComponent } from "../article-list/article-card.component";
 import { CommentSectionComponent } from "../article-list/comment-section.component";
-import {NotificationService} from "../../services/notification.service";
-import {MatButtonModule} from "@angular/material/button";
-import {MatIconModule} from "@angular/material/icon";
+import { NotificationService } from "../../services/notification.service";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-review-queue',
@@ -24,11 +24,11 @@ import {MatIconModule} from "@angular/material/icon";
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-4">Review Queue</h2>
 
-      <p *ngIf="pendingArticles.length === 0" class="text-gray-600">
+      <p *ngIf="pendingArticles().length === 0" class="text-gray-600">
         No articles pending review.
       </p>
 
-      <div *ngFor="let article of pendingArticles; trackBy: trackByArticleId" class="mb-4">
+      <div *ngFor="let article of pendingArticles(); trackBy: trackByArticleId" class="mb-4">
         <app-article-card [article]="article">
           <div>
             <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
@@ -57,26 +57,35 @@ import {MatIconModule} from "@angular/material/icon";
   `
 })
 export class ReviewQueueComponent implements OnInit {
-  pendingArticles: ArticleDTO[] = [];
-  currentComment: string = '';
+  private pendingArticlesSignal = signal<ArticleDTO[]>([]);
+  private currentCommentSignal = signal<string>('');
 
-  constructor(private articleService: ArticleService, private reviewService: ReviewService, private notificationService: NotificationService) {}
+  pendingArticles = computed(() => this.pendingArticlesSignal());
+  currentComment = computed(() => this.currentCommentSignal());
+
+  private articleService = inject(ArticleService);
+  private reviewService = inject(ReviewService);
+  private notificationService = inject(NotificationService);
 
   ngOnInit() {
-    this.articleService.getPendingArticles().subscribe(articles => {
-      this.pendingArticles = articles;
-      console.log('Pending articles:', articles);
-    });
+    this.loadPendingArticles();
+  }
+
+  loadPendingArticles() {
+    const articles = this.articleService.getPendingArticles();
+    this.pendingArticlesSignal.set(articles);
+    console.log('Pending articles:', articles);
   }
 
   onCommentAdded(comment: string) {
-    this.currentComment = comment;
+    this.currentCommentSignal.set(comment);
   }
 
   approveArticle(article: ArticleDTO) {
     this.createReviewForArticle(article, ReviewStatus.APPROVED).subscribe({
       next: (review) => {
         this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
+        this.loadPendingArticles();
       },
       error: (error) => {
         this.notificationService.showNotification('Error creating review for approval:', error, 'error');
@@ -85,26 +94,26 @@ export class ReviewQueueComponent implements OnInit {
   }
 
   rejectArticle(id: number) {
-    const article = this.pendingArticles.find(a => a.id === id);
+    const article = this.pendingArticlesSignal().find(a => a.id === id);
     if (article) {
       this.createReviewForArticle(article, ReviewStatus.REJECTED).subscribe({
         next: (review) => {
-            this.notificationService.showNotification('Success', 'Review created successfully for rejection', 'success');
+          this.notificationService.showNotification('Success', 'Review created successfully for rejection', 'success');
+          this.loadPendingArticles();
         },
         error: (error) => {
-            this.notificationService.showNotification('Error creating review for rejection:', error, 'error');
+          this.notificationService.showNotification('Error creating review for rejection:', error, 'error');
         }
       });
     }
   }
 
   createReviewForArticle(article: ArticleDTO, status: ReviewStatus) {
-    console.log(this.currentComment);
     const newReview = {
       postId: article.id,
       reviewerId: 1,
       status: status,
-      comment: this.currentComment || ''
+      comment: this.currentCommentSignal() || ''
     };
 
     return this.reviewService.createReview(newReview);

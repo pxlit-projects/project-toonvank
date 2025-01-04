@@ -1,8 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import {BehaviorSubject, Observable, map, catchError, throwError, tap, of} from 'rxjs';
+import { inject, Injectable, signal, computed } from '@angular/core';
+import { Observable, map, catchError, throwError, tap } from 'rxjs';
 import { Article, ArticleDTO } from '../models/article.model';
-import { HttpClient } from "@angular/common/http";
-import {data} from "autoprefixer";
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,7 @@ export class ArticleService {
   private endpoint: string = 'http://localhost:8086/post/api/posts';
   http: HttpClient = inject(HttpClient);
 
-  private articles = new BehaviorSubject<ArticleDTO[]>([]);
+  private articles = signal<ArticleDTO[]>([]);
 
   constructor() {
     this.loadArticles();
@@ -19,7 +18,7 @@ export class ArticleService {
 
   public loadArticles(): void {
     this.http.get<ArticleDTO[]>(this.endpoint).pipe(
-        tap(data => this.articles.next(data)),
+        tap(data => this.articles.set(data)),
         catchError(this.handleError<ArticleDTO[]>('loadArticles', []))
     ).subscribe();
   }
@@ -36,26 +35,20 @@ export class ArticleService {
     );
   }
 
-  getArticles(): Observable<ArticleDTO[]> {
-    return this.articles.asObservable();
+  getArticles(): ArticleDTO[] {
+    return this.articles();
   }
 
-  getPendingArticles(): Observable<ArticleDTO[]> {
-    return this.articles.pipe(
-        map(articles => articles.filter(article => article.status === 'PENDING'))
-    );
+  getPendingArticles(): ArticleDTO[] {
+    return computed(() => this.articles().filter(article => article.status === 'PENDING'))();
   }
 
-  getDraftArticles(): Observable<ArticleDTO[]> {
-    return this.articles.pipe(
-        map(articles => articles.filter(article => article.status === 'DRAFT'))
-    );
+  getDraftArticles(): ArticleDTO[] {
+    return this.articles().filter(article => article.status === 'DRAFT');
   }
 
-  getRejectedArticles(): Observable<ArticleDTO[]> {
-    return this.articles.pipe(
-        map(articles => articles.filter(article => article.status === 'REJECTED'!))
-    );
+  getRejectedArticles(): ArticleDTO[] {
+    return computed(() => this.articles().filter(article => article.status === 'REJECTED'))();
   }
 
   createArticle(article: Partial<Article>): Observable<Article> {
@@ -70,7 +63,7 @@ export class ArticleService {
     };
 
     return this.http.post<Article>(this.endpoint, newArticle).pipe(
-        tap(savedArticle => this.loadArticles()),
+        tap(() => this.loadArticles()),
         catchError(this.handleError<Article>('createArticle'))
     );
   }

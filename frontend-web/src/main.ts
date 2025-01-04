@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, provideExperimentalZonelessChangeDetection, signal} from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { provideRouter, Router, RouterModule, RouterOutlet, Routes } from '@angular/router';
@@ -61,7 +61,7 @@ const routes: Routes = [
             <mat-icon>article</mat-icon>
             Articles
           </a>
-          @if (isHoofdredacteur() || isRedacteur()) {
+          <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
             <a mat-button routerLink="/editor">
               <mat-icon>edit</mat-icon>
               New Article
@@ -70,24 +70,25 @@ const routes: Routes = [
               <mat-icon>drafts</mat-icon>
               My Drafts
             </a>
-          }
-          @if (isHoofdredacteur()) {
+          </ng-container>
+          <ng-container *ngIf="isHoofdredacteur()">
             <a mat-button routerLink="/review">
               <mat-icon>rate_review</mat-icon>
               Review Queue
             </a>
-          }
+          </ng-container>
         </div>
 
         <div class="flex items-center gap-2">
           <span class="text-sm">{{ userRole?.toString() }}</span>
-          
-          @if (!userRole) {
+
+          <ng-container *ngIf="!userRole">
             <a mat-button routerLink="/login">
               <mat-icon>login</mat-icon>
               Login
             </a>
-          } @else {
+          </ng-container>
+          <ng-container *ngIf="userRole">
             <button mat-icon-button routerLink="/login" title="Switch User">
               <mat-icon>switch_account</mat-icon>
             </button>
@@ -95,7 +96,7 @@ const routes: Routes = [
               <mat-icon>logout</mat-icon>
               Logout
             </button>
-          }
+          </ng-container>
         </div>
       </div>
     </mat-toolbar>
@@ -110,11 +111,15 @@ const routes: Routes = [
 })
 export class App {
   name = 'News Management System';
+  private authService = inject(AuthenticationService);
+  private userRoleSignal = signal<UserRole | null>(null);
 
-  constructor(private authService: AuthenticationService) {}
+  constructor() {
+    this.userRoleSignal.set(this.authService.getUserRole());
+  }
 
   get userRole() {
-    return this.authService.getUserRole();
+    return this.userRoleSignal();
   }
 
   isGebruiker() {
@@ -131,6 +136,7 @@ export class App {
 
   logout() {
     this.authService.logout();
+    this.userRoleSignal.set(null);
   }
 }
 
@@ -139,6 +145,7 @@ bootstrapApplication(App, {
     provideRouter(routes),
     provideHttpClient(),
     AuthenticationService,
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    provideExperimentalZonelessChangeDetection()
   ]
 }).catch(err => console.error(err));

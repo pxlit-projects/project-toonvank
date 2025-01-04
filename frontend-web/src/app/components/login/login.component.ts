@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from "@angular/forms";
+import {
+    ReactiveFormsModule,
+    FormBuilder,
+    FormGroup,
+    Validators
+} from "@angular/forms";
 import { UserRole } from "../../services/authentication/user-roles.enum";
 import { CommonModule } from "@angular/common";
 import { MatCardModule } from '@angular/material/card';
@@ -13,7 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     selector: 'login',
     imports: [
         CommonModule,
-        FormsModule,
+        ReactiveFormsModule,
         MatCardModule,
         MatInputModule,
         MatSelectModule,
@@ -29,41 +34,45 @@ import { MatFormFieldModule } from '@angular/material/form-field';
                 </mat-card-header>
 
                 <mat-card-content>
-                    <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-6">
+                    <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-6">
                         <mat-form-field class="w-full">
                             <mat-label>Naam</mat-label>
                             <input
-                                matInput
-                                type="text"
-                                id="name"
-                                name="name"
-                                [(ngModel)]="userName"
-                                required
-                                placeholder="Voer uw naam in"
+                                    matInput
+                                    type="text"
+                                    id="name"
+                                    formControlName="userName"
+                                    required
+                                    placeholder="Voer uw naam in"
                             />
+                            @if (loginForm.get('userName')?.invalid && loginForm.get('userName')?.touched) {
+                                <mat-error>Naam is verplicht</mat-error>
+                            }
                         </mat-form-field>
 
                         <mat-form-field class="w-full">
                             <mat-label>Selecteer uw rol</mat-label>
                             <mat-select
-                                id="role"
-                                name="role"
-                                [(ngModel)]="selectedRole"
-                                required
+                                    id="role"
+                                    formControlName="selectedRole"
+                                    required
                             >
                                 <mat-option [value]="null" disabled>Kies een rol...</mat-option>
-                                <mat-option [value]="UserRole.Gebruiker">Gebruiker</mat-option>
-                                <mat-option [value]="UserRole.Redacteur">Redacteur</mat-option>
-                                <mat-option [value]="UserRole.Hoofdredacteur">Hoofdredacteur</mat-option>
+                                @for (role of roleOptions; track role) {
+                                    <mat-option [value]="role">{{ role }}</mat-option>
+                                }
                             </mat-select>
+                            @if (loginForm.get('selectedRole')?.invalid && loginForm.get('selectedRole')?.touched) {
+                                <mat-error>Rol is verplicht</mat-error>
+                            }
                         </mat-form-field>
 
                         <button
-                            mat-raised-button
-                            color="primary"
-                            type="submit"
-                            [disabled]="!loginForm.form.valid"
-                            class="w-full"
+                                mat-raised-button
+                                color="primary"
+                                type="submit"
+                                [disabled]="loginForm.invalid"
+                                class="w-full"
                         >
                             Log in
                         </button>
@@ -82,24 +91,43 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         }
     `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
+    // Use signals for reactive state management
     roleOptions = Object.values(UserRole);
-    selectedRole: UserRole;
-    userName: string;
+    loginForm!: FormGroup;
 
-    constructor(private router: Router) {
+    constructor(
+        private formBuilder: FormBuilder,
+        private router: Router
+    ) {}
+
+    ngOnInit() {
+        // Retrieve saved values from localStorage
         const savedRole = localStorage.getItem('userRole') as UserRole;
         const savedName = localStorage.getItem('userName');
 
-        this.selectedRole = savedRole || UserRole.Gebruiker;
-        this.userName = savedName || '';
+        // Create reactive form
+        this.loginForm = this.formBuilder.group({
+            userName: [savedName || '', Validators.required],
+            selectedRole: [savedRole || UserRole.Gebruiker, Validators.required]
+        });
     }
 
     login() {
-        localStorage.setItem('userRole', this.selectedRole);
-        localStorage.setItem('userName', this.userName);
+        // Check form validity
+        if (this.loginForm.invalid) return;
+
+        // Get form values
+        const { userName, selectedRole } = this.loginForm.value;
+
+        // Save to localStorage
+        localStorage.setItem('userRole', selectedRole);
+        localStorage.setItem('userName', userName);
+
+        // Navigate to articles page
         this.router.navigate(['/articles']);
     }
 
+    // Expose UserRole for template usage
     protected readonly UserRole = UserRole;
 }
