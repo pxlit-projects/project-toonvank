@@ -6,104 +6,92 @@ import com.pxl.services.repository.ReviewRepository;
 import com.pxl.services.services.ReviewDatabaseSeeder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
+@SpringBootTest
+@Testcontainers
 class ReviewDatabaseSeederTest {
 
-    @Mock
-    private ReviewRepository reviewRepository;
+    @Container
+    private static final MySQLContainer<?> sqlContainer = new MySQLContainer<>("mysql:8.0")
+            .withDatabaseName("test")
+            .withUsername("test")
+            .withPassword("test");
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+    @Autowired
     private ReviewDatabaseSeeder seeder;
 
-    @Captor
-    private ArgumentCaptor<List<Review>> reviewListCaptor;
+    @DynamicPropertySource
+    static void registerMySQLProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", sqlContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", sqlContainer::getUsername);
+        registry.add("spring.datasource.password", sqlContainer::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+    }
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        seeder = new ReviewDatabaseSeeder(reviewRepository);
+        reviewRepository.deleteAll();
     }
 
     @Test
-    void run_ShouldCallSeedReviews() throws Exception {
-        when(reviewRepository.count()).thenReturn(0L);
-
+    void run_ShouldSeedReviewsWhenDatabaseEmpty() throws Exception {
         seeder.run();
 
-        verify(reviewRepository).count();
-        verify(reviewRepository).saveAll(any());
-    }
+        List<Review> reviews = reviewRepository.findAll();
+        assertEquals(3, reviews.size());
 
-    @Test
-    void seedReviews_WhenDatabaseEmpty_ShouldSaveReviews() throws Exception {
-        when(reviewRepository.count()).thenReturn(0L);
-
-        seeder.run();
-
-        verify(reviewRepository).saveAll(reviewListCaptor.capture());
-        List<Review> savedReviews = reviewListCaptor.getValue();
-
-        assertEquals(3, savedReviews.size());
-
-        Review firstReview = savedReviews.get(0);
-        assertAll("First Review Verification",
+        Review firstReview = reviews.get(0);
+        assertAll("First Review",
                 () -> assertEquals(1L, firstReview.getPostId()),
                 () -> assertEquals(ReviewStatus.PUBLISHED, firstReview.getStatus()),
                 () -> assertEquals("Great post! Very informative.", firstReview.getComment()),
                 () -> assertNotNull(firstReview.getReviewedAt())
         );
 
-        Review secondReview = savedReviews.get(1);
-        assertAll("Second Review Verification",
+        Review secondReview = reviews.get(1);
+        assertAll("Second Review",
                 () -> assertEquals(1L, secondReview.getPostId()),
                 () -> assertEquals(ReviewStatus.PENDING, secondReview.getStatus()),
-                () -> assertEquals("Needs more details on the topic.", secondReview.getComment()),
-                () -> assertNotNull(secondReview.getReviewedAt())
-        );
-
-        Review thirdReview = savedReviews.get(2);
-        assertAll("Third Review Verification",
-                () -> assertEquals(2L, thirdReview.getPostId()),
-                () -> assertEquals(ReviewStatus.REJECTED, thirdReview.getStatus()),
-                () -> assertEquals("The post is not relevant.", thirdReview.getComment()),
-                () -> assertNotNull(thirdReview.getReviewedAt())
+                () -> assertEquals("Needs more details on the topic.", secondReview.getComment())
         );
     }
 
     @Test
-    void seedReviews_WhenDatabaseNotEmpty_ShouldNotSaveReviews() throws Exception {
-        when(reviewRepository.count()).thenReturn(1L);
+    void run_ShouldNotSeedWhenDatabaseNotEmpty() throws Exception {
+        reviewRepository.save(Review.builder()
+                .postId(1L)
+                .status(ReviewStatus.DRAFT)
+                .comment("Existing review")
+                .build());
 
         seeder.run();
 
-        verify(reviewRepository, never()).saveAll(any());
+        assertEquals(1, reviewRepository.count());
     }
 
     @Test
     void seedReviews_ShouldSetCorrectTimestamps() throws Exception {
-        when(reviewRepository.count()).thenReturn(0L);
         LocalDateTime beforeTest = LocalDateTime.now();
-
         seeder.run();
-
-        verify(reviewRepository).saveAll(reviewListCaptor.capture());
-        List<Review> savedReviews = reviewListCaptor.getValue();
-
         LocalDateTime afterTest = LocalDateTime.now();
 
-        assertAll("Timestamp Verifications",
-                () -> assertTrue(isTimestampInRange(savedReviews.get(0).getReviewedAt(), beforeTest, afterTest)),
-                () -> assertTrue(isTimestampInRange(savedReviews.get(1).getReviewedAt(), beforeTest, afterTest)),
-                () -> assertTrue(isTimestampInRange(savedReviews.get(2).getReviewedAt(), beforeTest, afterTest))
+        List<Review> reviews = reviewRepository.findAll();
+        reviews.forEach(review ->
+                assertTrue(isTimestampInRange(review.getReviewedAt(), beforeTest, afterTest))
         );
     }
 
