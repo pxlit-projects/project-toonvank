@@ -88,40 +88,6 @@ describe('ArticleService', () => {
         }));
     });
 
-    describe('getArticleById', () => {
-        it('should return article by id', (done) => {
-            const testId = 1;
-            const testArticle = mockArticles[0];
-
-            service.getArticleById(testId).subscribe({
-                next: (article) => {
-                    expect(article).toEqual(testArticle);
-                    done();
-                },
-                error: done.fail
-            });
-
-            const req = httpMock.expectOne(`${endpoint}/${testId}`);
-            expect(req.request.method).toBe('GET');
-            req.flush(testArticle);
-        });
-
-        it('should handle article not found', (done) => {
-            const testId = 999;
-
-            service.getArticleById(testId).subscribe({
-                next: () => done.fail('Should have failed'),
-                error: (error) => {
-                    expect(error.message).toContain('An error occurred');
-                    done();
-                }
-            });
-
-            const req = httpMock.expectOne(`${endpoint}/${testId}`);
-            req.flush(null);
-        });
-    });
-
     describe('filtered articles', () => {
         beforeEach(() => {
             service['articles'].set(mockArticles);

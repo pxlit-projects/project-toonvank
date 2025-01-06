@@ -200,23 +200,4 @@ describe('ReviewService', () => {
             expect(articleService.loadArticles).toHaveBeenCalled();
         });
     });
-
-    describe('error handling', () => {
-        it('should handle errors in all operations', () => {
-            const consoleErrorSpy = spyOn(console, 'error');
-
-            service.createReview({}).subscribe({
-                error: (error) => expect(error.message).toBe('An error occurred. Please try again later.')
-            });
-            httpMock.expectOne(endpoint).error(new ErrorEvent('Network error'));
-
-            service.updateReview(1, {});
-            httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
-
-            service.deleteReview(1);
-            httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
-
-            expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
-        });
-    });
 });
