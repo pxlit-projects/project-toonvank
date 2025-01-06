@@ -1,4 +1,4 @@
-import {Component, inject, provideExperimentalZonelessChangeDetection, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { provideRouter, Router, RouterModule, RouterOutlet, Routes } from '@angular/router';
@@ -146,6 +146,5 @@ bootstrapApplication(App, {
     provideHttpClient(),
     AuthenticationService,
     provideAnimationsAsync(),
-    provideExperimentalZonelessChangeDetection()
   ]
 }).catch(err => console.error(err));
