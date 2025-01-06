@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ReviewService } from './review.service';
 import { Review, ReviewDTO, ReviewStatus } from '../models/review.model';
@@ -8,6 +8,7 @@ describe('ReviewService', () => {
     let service: ReviewService;
     let httpMock: HttpTestingController;
     let articleService: jasmine.SpyObj<ArticleService>;
+    const endpoint = 'http://localhost:8086/review/api/reviews';
 
     const mockReviews: ReviewDTO[] = [
         { id: 1, postId: 1, status: ReviewStatus.PENDING, comment: 'Pending review', reviewedAt: new Date().toISOString() },
@@ -31,7 +32,7 @@ describe('ReviewService', () => {
         articleService = TestBed.inject(ArticleService) as jasmine.SpyObj<ArticleService>;
 
         // Handle the initial loadReviews call from constructor
-        const req = httpMock.expectOne('http://localhost:8086/review/api/reviews');
+        const req = httpMock.expectOne(endpoint);
         req.flush(mockReviews);
     });
 
@@ -44,24 +45,20 @@ describe('ReviewService', () => {
     });
 
     describe('getReviewById', () => {
-        it('should return a review by id', fakeAsync(() => {
+        it('should return a review by id', () => {
             const testId = 1;
             const expectedReview = mockReviews[0];
 
-            let actualReview: ReviewDTO | undefined;
             service.getReviewById(testId).subscribe(review => {
-                actualReview = review;
+                expect(review).toEqual(expectedReview);
             });
 
-            const req = httpMock.expectOne(`http://localhost:8086/review/api/reviews/${testId}`);
+            const req = httpMock.expectOne(`${endpoint}/${testId}`);
             expect(req.request.method).toBe('GET');
             req.flush(expectedReview);
+        });
 
-            tick();
-            expect(actualReview).toEqual(expectedReview);
-        }));
-
-        it('should handle error when review is not found', fakeAsync(() => {
+        it('should handle error when review is not found', () => {
             service.getReviewById(999).subscribe({
                 next: () => fail('should have failed with an error'),
                 error: (error) => {
@@ -69,49 +66,33 @@ describe('ReviewService', () => {
                 }
             });
 
-            const req = httpMock.expectOne('http://localhost:8086/review/api/reviews/999');
+            const req = httpMock.expectOne(`${endpoint}/999`);
             req.error(new ErrorEvent('Not Found'));
-            tick();
-        }));
+        });
     });
 
     describe('filtered reviews', () => {
-        it('should return pending reviews', fakeAsync(() => {
-            let result: ReviewDTO[] | undefined;
-            service.getPendingReviews().subscribe(reviews => {
-                result = reviews;
-            });
+        it('should return pending reviews', () => {
+            const pendingReviews = service.getPendingReviews();
+            expect(pendingReviews.length).toBe(1);
+            expect(pendingReviews[0].status).toBe(ReviewStatus.PENDING);
+        });
 
-            tick();
-            expect(result?.length).toBe(1);
-            expect(result?.[0].status).toBe(ReviewStatus.PENDING);
-        }));
+        it('should return approved reviews', () => {
+            const approvedReviews = service.getApprovedReviews();
+            expect(approvedReviews.length).toBe(1);
+            expect(approvedReviews[0].status).toBe(ReviewStatus.APPROVED);
+        });
 
-        it('should return approved reviews', fakeAsync(() => {
-            let result: ReviewDTO[] | undefined;
-            service.getApprovedReviews().subscribe(reviews => {
-                result = reviews;
-            });
-
-            tick();
-            expect(result?.length).toBe(1);
-            expect(result?.[0].status).toBe(ReviewStatus.APPROVED);
-        }));
-
-        it('should return rejected reviews', fakeAsync(() => {
-            let result: ReviewDTO[] | undefined;
-            service.getRejectedReviews().subscribe(reviews => {
-                result = reviews;
-            });
-
-            tick();
-            expect(result?.length).toBe(1);
-            expect(result?.[0].status).toBe(ReviewStatus.REJECTED);
-        }));
+        it('should return rejected reviews', () => {
+            const rejectedReviews = service.getRejectedReviews();
+            expect(rejectedReviews.length).toBe(1);
+            expect(rejectedReviews[0].status).toBe(ReviewStatus.REJECTED);
+        });
     });
 
     describe('createReview', () => {
-        it('should create a new review', fakeAsync(() => {
+        it('should create a new review and reload reviews', () => {
             const newReview: Partial<Review> = {
                 postId: 4,
                 comment: 'New review'
@@ -124,26 +105,30 @@ describe('ReviewService', () => {
                 reviewedAt: new Date().toISOString()
             };
 
-            let createdReview: Review | undefined;
+            const expectedReviewDTO: ReviewDTO = {
+                ...expectedReview,
+                id: 4
+            };
+
             service.createReview(newReview).subscribe(review => {
-                createdReview = review;
+                expect(review).toEqual(expectedReview);
             });
 
-            const req = httpMock.expectOne('http://localhost:8086/review/api/reviews');
+            const req = httpMock.expectOne(endpoint);
             expect(req.request.method).toBe('POST');
             req.flush(expectedReview);
 
             // Handle the loadReviews call
-            const reloadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
-            reloadReq.flush([...mockReviews, expectedReview]);
+            const reloadReq = httpMock.expectOne(endpoint);
+            const updatedMockReviews = [...mockReviews, expectedReviewDTO];
+            reloadReq.flush(updatedMockReviews);
 
-            tick();
-            expect(createdReview).toEqual(expectedReview);
-        }));
+            expect(service.getReviews()).toEqual(updatedMockReviews);
+        });
     });
 
     describe('updateReview', () => {
-        it('should update a review', fakeAsync(() => {
+        it('should update a review and reload reviews', () => {
             const updatedReview: Partial<ReviewDTO> = {
                 id: 1,
                 comment: 'Updated review',
@@ -152,31 +137,96 @@ describe('ReviewService', () => {
 
             service.updateReview(1, updatedReview);
 
-            const req = httpMock.expectOne('http://localhost:8086/review/api/reviews/1');
+            const req = httpMock.expectOne(`${endpoint}/1`);
             expect(req.request.method).toBe('PUT');
             req.flush({});
 
             // Handle the loadReviews call
-            const reloadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
-            reloadReq.flush(mockReviews);
+            const reloadReq = httpMock.expectOne(endpoint);
+            const updatedMockReviews = mockReviews.map(r =>
+                r.id === 1 ? { ...r, ...updatedReview } : r
+            );
+            reloadReq.flush(updatedMockReviews);
 
-            tick();
-        }));
+            expect(service.getReviews()).toEqual(updatedMockReviews);
+        });
     });
 
     describe('deleteReview', () => {
-        it('should delete a review', fakeAsync(() => {
+        it('should delete a review and reload reviews', () => {
             service.deleteReview(1);
 
-            const req = httpMock.expectOne('http://localhost:8086/review/api/reviews/1');
+            const req = httpMock.expectOne(`${endpoint}/1`);
             expect(req.request.method).toBe('DELETE');
             req.flush({});
 
             // Handle the loadReviews call
-            const reloadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
-            reloadReq.flush(mockReviews.filter(r => r.id !== 1));
+            const reloadReq = httpMock.expectOne(endpoint);
+            const updatedMockReviews = mockReviews.filter(r => r.id !== 1);
+            reloadReq.flush(updatedMockReviews);
 
-            tick();
-        }));
+            expect(service.getReviews()).toEqual(updatedMockReviews);
+        });
+    });
+
+    describe('updateReviewStatus', () => {
+        it('should update review status and reload reviews', () => {
+            const updatedStatus = ReviewStatus.APPROVED;
+
+            // Access private method through type assertion
+            (service as any).updateReviewStatus(1, updatedStatus);
+
+            const req = httpMock.expectOne(`${endpoint}/1/updateStatus`);
+            expect(req.request.method).toBe('PUT');
+            expect(req.request.body).toEqual({ status: updatedStatus });
+            req.flush({});
+
+            // Handle the loadReviews call
+            const reloadReq = httpMock.expectOne(endpoint);
+            const updatedMockReviews = mockReviews.map(r =>
+                r.id === 1 ? { ...r, status: updatedStatus } : r
+            );
+            reloadReq.flush(updatedMockReviews);
+
+            expect(service.getReviews()).toEqual(updatedMockReviews);
+        });
+    });
+
+    describe('updateArticleStatus', () => {
+        it('should update article status and trigger article service reload', () => {
+            const newStatus = 'PUBLISHED';
+
+            // Access private method through type assertion
+            (service as any).updateArticleStatus(1, newStatus);
+
+            const req = httpMock.expectOne(`${endpoint}/1/updateStatus`);
+            expect(req.request.method).toBe('PUT');
+            expect(req.request.body).toBe(newStatus);
+            req.flush({});
+
+            expect(articleService.loadArticles).toHaveBeenCalled();
+        });
+    });
+
+    describe('error handling', () => {
+        it('should handle errors in all operations', () => {
+            const consoleErrorSpy = spyOn(console, 'error');
+
+            // Test create error
+            service.createReview({}).subscribe({
+                error: (error) => expect(error.message).toBe('An error occurred. Please try again later.')
+            });
+            httpMock.expectOne(endpoint).error(new ErrorEvent('Network error'));
+
+            // Test update error
+            service.updateReview(1, {});
+            httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
+
+            // Test delete error
+            service.deleteReview(1);
+            httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
+
+            expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
+        });
     });
 });

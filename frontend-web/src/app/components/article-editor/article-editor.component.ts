@@ -58,21 +58,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         </div>
 
         <div class="flex gap-2">
-          <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-          >
-            Save as Draft
-          </button>
-          <button
-              mat-raised-button
-              color="accent"
-              type="button"
-              (click)="submitForReview()"
-          >
-            Submit for Review
-          </button>
+          @if (article.status === 'DRAFT') {
+            <button mat-raised-button color="primary" type="submit">
+              Save as Draft
+            </button>
+            <button mat-raised-button color="accent" type="button" (click)="submitForReview()">
+              Submit for Review
+            </button>
+          } @else {
+            <button mat-raised-button color="primary" type="submit">
+              Save
+            </button>
+          }
         </div>
       </form>
     </div>
@@ -111,16 +108,22 @@ export class ArticleEditorComponent implements OnInit {
     if (this.isEditing && this.article.id) {
       this.articleService.updateArticle(this.article.id, {
         ...this.article,
-        status: 'DRAFT'
+        status: this.article.status
       });
+      if (this.article.status === 'DRAFT') {
+        this.router.navigate(['/drafts']);
+      } else {
+        this.router.navigate(['/articles']);
+      }
     } else {
       this.articleService.createArticle({
         ...this.article,
         author: localStorage.getItem("userName")!,
         status: 'DRAFT'
-      }).subscribe();
+      }).subscribe(() => {
+        this.router.navigate(['/drafts']);
+      });
     }
-    this.router.navigate(['/drafts']);
   }
 
   submitForReview() {

@@ -39,8 +39,14 @@ main() {
     # Return to original directory
     cd "$ORIGINAL_DIR" || exit 1
 
+    # Clean frontend
+    docker rm -f front-end
+    docker rmi $(docker images | grep 'frontend-web' | awk '{print $3}') 2>/dev/null || true
+    docker builder prune -f
+
     # Run docker-compose
     green "Starting Docker containers..."
+    docker compose down -v
     docker-compose up -d
     check_status "Docker Compose"
 

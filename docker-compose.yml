@@ -6,6 +6,7 @@ services:
       build:
         context: ./frontend-web
         dockerfile: Dockerfile
+        no_cache: true
       ports:
         - "4200:80"
 

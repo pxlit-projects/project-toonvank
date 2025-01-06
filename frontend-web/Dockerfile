@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the application (with verbose output for debugging)
-RUN npm run build -- --output-path=/usr/src/app/dist/frontend-web
+RUN npm run build -- --output-path=/usr/src/app/dist/frontend-web --configuration=production
 
 # Stage 2: Serve the application using Nginx
 FROM nginx:alpine

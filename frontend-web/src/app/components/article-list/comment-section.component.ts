@@ -88,7 +88,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                 }
             </div>
         } @else {
-            <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
+            @if (showNoCommentsYet) {
+                <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
+            }
         }
 
         @if (isAllowedToAdd) {
@@ -126,6 +128,7 @@ export class CommentSectionComponent implements OnInit {
     @Input({ required: true }) articleId!: number;
     @Input() isAllowedToAdd: boolean = true;
     @Input() isAllowedToPost: boolean = true;
+    @Input() showNoCommentsYet: boolean = true;
     @Output() commentAdded = new EventEmitter<string>();
 
     private commentService = inject(CommentService);

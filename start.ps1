@@ -17,6 +17,7 @@ try {
 
     # Run docker-compose
     Write-Host "Starting Docker containers..." -ForegroundColor Green
+    docker compose down -v
     docker-compose up -d
 
     if ($LASTEXITCODE -ne 0) {

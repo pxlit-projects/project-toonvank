@@ -29,9 +29,9 @@ import { MatIconModule } from "@angular/material/icon";
       </p>
 
       <div *ngFor="let article of pendingArticles(); trackBy: trackByArticleId" class="mb-4">
-        <app-article-card [article]="article">
+        <app-article-card [article]="article" [isAllowedToEdit]="false">
           <div>
-            <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
+            <app-comment-section [articleId]="article.id" [isAllowedToPost]="false" [showNoCommentsYet]="false" (commentAdded)="onCommentAdded($event)"></app-comment-section>
           </div>
         </app-article-card>
         <div class="mt-4 flex gap-2 justify-end">
