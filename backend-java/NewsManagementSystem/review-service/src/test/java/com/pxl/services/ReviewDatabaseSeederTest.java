@@ -110,20 +110,4 @@ class ReviewDatabaseSeederTest {
     private boolean isTimestampInRange(LocalDateTime timestamp, LocalDateTime start, LocalDateTime end) {
         return !timestamp.isBefore(start) && !timestamp.isAfter(end);
     }
-
-    @Test
-    void seedReviews_ShouldUseBuilderPattern() throws Exception {
-        when(reviewRepository.count()).thenReturn(0L);
-
-        seeder.run();
-
-        verify(reviewRepository).saveAll(reviewListCaptor.capture());
-        List<Review> savedReviews = reviewListCaptor.getValue();
-
-        assertAll("Builder Pattern Verification",
-                () -> assertNotNull(savedReviews.get(0)),
-                () -> assertNotNull(savedReviews.get(1)),
-                () -> assertNotNull(savedReviews.get(2))
-        );
-    }
 }

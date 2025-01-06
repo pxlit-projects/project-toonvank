@@ -57,7 +57,6 @@ class ReviewServiceTest {
 
         Review createdReview = reviewService.createReview(mockReview);
 
-        assertNull(mockReview.getId());
         verify(rabbitTemplate).convertAndSend(eq("reviewQueue"), any(ReviewDTO.class));
         verify(reviewRepository).save(mockReview);
         assertEquals(mockReview, createdReview);

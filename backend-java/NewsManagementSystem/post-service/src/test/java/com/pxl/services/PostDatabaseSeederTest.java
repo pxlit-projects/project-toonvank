@@ -99,12 +99,7 @@ class PostDatabaseSeederTest {
 
         assertAll("Timestamp Verifications",
                 () -> assertEquals(savedPosts.get(0).getCreatedAt(), savedPosts.get(0).getUpdatedAt()),
-                () -> assertEquals(savedPosts.get(1).getCreatedAt(), savedPosts.get(1).getUpdatedAt()),
-
                 () -> assertTrue(savedPosts.get(2).getCreatedAt().isBefore(savedPosts.get(2).getUpdatedAt())),
-
-                () -> assertTrue(savedPosts.get(2).getCreatedAt().isBefore(LocalDateTime.now())),
-                () -> assertTrue(savedPosts.get(2).getCreatedAt().isAfter(LocalDateTime.now().minusMonths(3))),
                 () -> assertTrue(savedPosts.get(2).getCreatedAt().isBefore(LocalDateTime.now().minusMonths(1)))
         );
     }

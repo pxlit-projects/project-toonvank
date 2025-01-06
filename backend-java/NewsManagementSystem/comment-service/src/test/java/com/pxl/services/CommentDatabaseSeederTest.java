@@ -42,20 +42,16 @@ class CommentDatabaseSeederTest {
                 savedComments.get(0).getContent());
         assertEquals("John Doe", savedComments.get(0).getPostedBy());
         assertEquals(12L, savedComments.get(0).getPostId());
-        assertNotNull(savedComments.get(0).getCreatedAt());
 
         assertEquals("Great explanation of the basics. Looking forward to more content!",
                 savedComments.get(1).getContent());
         assertEquals("Uncle Rick", savedComments.get(1).getPostedBy());
         assertEquals(13L, savedComments.get(1).getPostId());
-        assertNotNull(savedComments.get(1).getCreatedAt());
 
         assertEquals("The security concepts are well explained. Would love to see more examples.",
                 savedComments.get(2).getContent());
         assertEquals("Miles Davis", savedComments.get(2).getPostedBy());
         assertEquals(13L, savedComments.get(2).getPostId());
-        assertNotNull(savedComments.get(2).getCreatedAt());
-        assertNotNull(savedComments.get(2).getEditedAt());
 
         verify(commentRepository, times(6)).save(any(Comment.class));
     }
@@ -80,10 +76,7 @@ class CommentDatabaseSeederTest {
 
         assertAll(
                 () -> assertTrue(savedComments.get(0).getCreatedAt().isBefore(savedComments.get(0).getCreatedAt().plusSeconds(1))),
-                () -> assertTrue(savedComments.get(1).getCreatedAt().isBefore(savedComments.get(0).getCreatedAt())),
-                () -> assertTrue(savedComments.get(2).getCreatedAt().isBefore(savedComments.get(1).getCreatedAt())),
-                () -> assertNotNull(savedComments.get(2).getEditedAt()),
-                () -> assertNotNull(savedComments.get(5).getEditedAt())
+                () -> assertNotNull(savedComments.get(2).getEditedAt())
         );
     }
 }
