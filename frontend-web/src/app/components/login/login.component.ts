@@ -92,7 +92,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     `]
 })
 export class LoginComponent implements OnInit {
-    // Use signals for reactive state management
     roleOptions = Object.values(UserRole);
     loginForm!: FormGroup;
 
@@ -102,11 +101,9 @@ export class LoginComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        // Retrieve saved values from localStorage
         const savedRole = localStorage.getItem('userRole') as UserRole;
         const savedName = localStorage.getItem('userName');
 
-        // Create reactive form
         this.loginForm = this.formBuilder.group({
             userName: [savedName || '', Validators.required],
             selectedRole: [savedRole || UserRole.Gebruiker, Validators.required]
@@ -114,20 +111,15 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
-        // Check form validity
         if (this.loginForm.invalid) return;
 
-        // Get form values
         const { userName, selectedRole } = this.loginForm.value;
 
-        // Save to localStorage
         localStorage.setItem('userRole', selectedRole);
         localStorage.setItem('userName', userName);
 
-        // Navigate to articles page
         this.router.navigate(['/articles']);
     }
 
-    // Expose UserRole for template usage
     protected readonly UserRole = UserRole;
 }

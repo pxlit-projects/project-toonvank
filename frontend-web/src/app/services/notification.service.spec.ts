@@ -12,7 +12,6 @@ describe('NotificationService', () => {
         });
         service = TestBed.inject(NotificationService);
 
-        // Create spy for Swal.fire
         swalFireSpy = spyOn(Swal, 'fire');
     });
 
@@ -65,19 +64,15 @@ describe('NotificationService', () => {
 
         service.showNotification('Test', 'Message');
 
-        // Get the didOpen callback function
         const didOpenFn = swalFireSpy.calls.mostRecent().args[0].didOpen;
 
-        // Create mock toast element
         const mockToast = {
             onmouseenter: null as Function | null,
             onmouseleave: null as Function | null
         };
 
-        // Call didOpen with mock toast
         didOpenFn(mockToast as any);
 
-        // Trigger mouse events
         mockToast.onmouseenter!();
         expect(stopTimerSpy).toHaveBeenCalled();
 

@@ -43,13 +43,11 @@ describe('ArticleService', () => {
         service = TestBed.inject(ArticleService);
         httpMock = TestBed.inject(HttpTestingController);
 
-        // Handle initial loadArticles call from constructor
         const req = httpMock.expectOne(endpoint);
         req.flush(mockArticles);
     });
 
     afterEach(() => {
-        // Verify no pending requests and clean up
         try {
             httpMock.verify();
         } catch (e) {
@@ -63,10 +61,8 @@ describe('ArticleService', () => {
 
     describe('loadArticles', () => {
         it('should load articles and update signal', fakeAsync(() => {
-            // Initial load was handled in beforeEach
             expect(service.getArticles()).toEqual(mockArticles);
 
-            // Test subsequent load
             service.loadArticles();
 
             const req = httpMock.expectOne(endpoint);
@@ -163,12 +159,10 @@ describe('ArticleService', () => {
                 error: (error) => fail(error)
             });
 
-            // Handle create request
             const createReq = httpMock.expectOne(endpoint);
             expect(createReq.request.method).toBe('POST');
             createReq.flush({ ...newArticle, id: 3 });
 
-            // Handle reload request
             const reloadReq = httpMock.expectOne(endpoint);
             reloadReq.flush([...mockArticles, { ...newArticle, id: 3 }]);
 
@@ -201,12 +195,10 @@ describe('ArticleService', () => {
             const updatedArticle = { title: 'Updated Title' };
             service.updateArticle(1, updatedArticle);
 
-            // Handle update request
             const updateReq = httpMock.expectOne(`${endpoint}/1`);
             expect(updateReq.request.method).toBe('PUT');
             updateReq.flush({ ...mockArticles[0], ...updatedArticle });
 
-            // Handle reload request
             const reloadReq = httpMock.expectOne(endpoint);
             reloadReq.flush(mockArticles);
 
@@ -219,12 +211,10 @@ describe('ArticleService', () => {
         it('should delete and reload articles', fakeAsync(() => {
             service.deleteArticle(1);
 
-            // Handle delete request
             const deleteReq = httpMock.expectOne(`${endpoint}/1`);
             expect(deleteReq.request.method).toBe('DELETE');
             deleteReq.flush({});
 
-            // Handle reload request
             const reloadReq = httpMock.expectOne(endpoint);
             reloadReq.flush(mockArticles.slice(1));
 

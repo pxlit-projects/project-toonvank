@@ -140,7 +140,6 @@ export class CommentSectionComponent implements OnInit {
     editableCommentContent = signal('');
 
     ngOnInit() {
-        // Replace effect with direct subscription using takeUntilDestroyed
         this.commentService.getCommentByPostId(this.articleId)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((comments) => {

@@ -22,8 +22,7 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedReviews() {
-        if (reviewRepository.count() == 0) { // Check if the table is empty
-            // Create and save sample reviews
+        if (reviewRepository.count() == 0) {
             Review review1 = Review.builder()
                     .postId(1L)
                     .status(ReviewStatus.PUBLISHED)
@@ -45,7 +44,7 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
                     .reviewedAt(LocalDateTime.now())
                     .build();
 
-            reviewRepository.saveAll(List.of(review1, review2, review3)); // Save the reviews to the repository
+            reviewRepository.saveAll(List.of(review1, review2, review3));
 
             System.out.println("Sample reviews have been added to the database.");
         } else {

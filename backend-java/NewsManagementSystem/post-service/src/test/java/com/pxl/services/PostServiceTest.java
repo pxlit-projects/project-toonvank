@@ -71,14 +71,11 @@ public class PostServiceTest {
 
     @Test
     void createPost_Success() {
-        // Arrange
         when(postMapper.toPost(testPostDTO)).thenReturn(testPost);
         when(postRepository.save(testPost)).thenReturn(testPost);
 
-        // Act
         Post createdPost = postService.createPost(testPostDTO);
 
-        // Assert
         assertEquals(testPost, createdPost);
         verify(postMapper).toPost(testPostDTO);
         verify(postRepository).save(testPost);
@@ -86,17 +83,14 @@ public class PostServiceTest {
 
     @Test
     void createPost_Exception() {
-        // Arrange
         when(postMapper.toPost(testPostDTO)).thenReturn(testPost);
         when(postRepository.save(testPost)).thenThrow(new RuntimeException("Save failed"));
 
-        // Act & Assert
         assertThrows(PostCreationException.class, () -> postService.createPost(testPostDTO));
     }
 
     @Test
     void updatePost_Success() {
-        // Arrange
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
@@ -112,10 +106,8 @@ public class PostServiceTest {
                 .status(ReviewStatus.DRAFT)
                 .build();
 
-        // Act
         Optional<Post> result = postService.updatePost(1L, updatedPostData);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals("Updated Title", result.get().getTitle());
         assertEquals("Updated Content", result.get().getContent());
@@ -127,14 +119,11 @@ public class PostServiceTest {
 
     @Test
     void updateStatus_Success() {
-        // Arrange
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
-        // Act
         Optional<Post> result = postService.updateStatus(1L, "PUBLISHED");
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(ReviewStatus.PUBLISHED, result.get().getStatus());
         verify(postRepository).findById(1L);
@@ -143,36 +132,29 @@ public class PostServiceTest {
 
     @Test
     void updateStatus_InvalidStatus() {
-        // Act & Assert
         assertThrows(IllegalArgumentException.class,
                 () -> postService.updateStatus(1L, "INVALID_STATUS"));
     }
 
     @Test
     void getPosts_Success() {
-        // Arrange
         List<Post> posts = Collections.singletonList(testPost);
         when(postRepository.findAll()).thenReturn(posts);
 
-        // Act
         List<Post> result = postService.getPosts();
 
-        // Assert
         assertEquals(posts, result);
         verify(postRepository).findAll();
     }
 
     @Test
     void searchPosts_Success() {
-        // Arrange
         List<Post> posts = Collections.singletonList(testPost);
         when(postRepository.findByContentContainingOrCategoryOrAuthor(
                 "content", "category", "author")).thenReturn(posts);
 
-        // Act
         List<Post> result = postService.searchPosts("content", "category", "author");
 
-        // Assert
         assertEquals(posts, result);
         verify(postRepository).findByContentContainingOrCategoryOrAuthor(
                 "content", "category", "author");
@@ -180,13 +162,10 @@ public class PostServiceTest {
 
     @Test
     void getPostById_Success() {
-        // Arrange
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
 
-        // Act
         Optional<Post> result = postService.getPostById(1L);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(testPost, result.get());
         verify(postRepository).findById(1L);
@@ -194,15 +173,12 @@ public class PostServiceTest {
 
     @Test
     void deletePost_Success() {
-        // Arrange
         when(postRepository.existsById(1L)).thenReturn(true);
         doNothing().when(reviewClient).deleteReviewsByPostId(1L);
         doNothing().when(postRepository).deleteById(1L);
 
-        // Act
         boolean result = postService.deletePost(1L);
 
-        // Assert
         assertTrue(result);
         verify(postRepository).existsById(1L);
         verify(reviewClient).deleteReviewsByPostId(1L);
@@ -211,16 +187,13 @@ public class PostServiceTest {
 
     @Test
     void deletePost_PostNotExists() {
-        // Arrange
         when(postRepository.existsById(1L)).thenReturn(false);
 
-        // Act & Assert
         assertThrows(PostDeletionException.class, () -> postService.deletePost(1L));
     }
 
     @Test
     void processReviewMessage_Success() {
-        // Arrange
         ReviewDTO reviewDTO = new ReviewDTO(
                 1L,
                 ReviewStatus.PUBLISHED,
@@ -231,17 +204,14 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
-        // Act
         postService.processReviewMessage(reviewDTO);
 
-        // Assert
         verify(postRepository).findById(1L);
         verify(postRepository).save(any(Post.class));
     }
 
     @Test
     void processReviewMessage_PostNotFound() {
-        // Arrange
         ReviewDTO reviewDTO = new ReviewDTO(
                 1L,
                 ReviewStatus.PUBLISHED,
@@ -251,19 +221,16 @@ public class PostServiceTest {
 
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        postService.processReviewMessage(reviewDTO); // Should not throw exception
+        postService.processReviewMessage(reviewDTO);
         verify(postRepository).findById(1L);
         verify(postRepository, never()).save(any(Post.class));
     }
 
     @Test
     void updatePost_ThrowsException() {
-        // Arrange
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(postRepository.save(any(Post.class))).thenThrow(new RuntimeException("Save failed"));
 
-        // Act & Assert
         assertThrows(PostUpdateException.class, () -> postService.updatePost(1L, testPost));
         verify(postRepository).findById(1L);
         verify(postRepository).save(any(Post.class));
@@ -271,21 +238,17 @@ public class PostServiceTest {
 
     @Test
     void getPosts_ThrowsException() {
-        // Arrange
         when(postRepository.findAll()).thenThrow(new RuntimeException("Database error"));
 
-        // Act & Assert
         assertThrows(PostPublishException.class, () -> postService.getPosts());
         verify(postRepository).findAll();
     }
 
     @Test
     void searchPosts_ThrowsException() {
-        // Arrange
         when(postRepository.findByContentContainingOrCategoryOrAuthor(anyString(), anyString(), anyString()))
                 .thenThrow(new RuntimeException("Search failed"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class,
                 () -> postService.searchPosts("content", "category", "author"));
         verify(postRepository).findByContentContainingOrCategoryOrAuthor(
@@ -294,22 +257,18 @@ public class PostServiceTest {
 
     @Test
     void getPostById_ThrowsException() {
-        // Arrange
         when(postRepository.findById(1L)).thenThrow(new RuntimeException("Database error"));
 
-        // Act & Assert
         assertThrows(PostNotFoundException.class, () -> postService.getPostById(1L));
         verify(postRepository).findById(1L);
     }
 
     @Test
     void deletePost_ReviewClientThrowsException() {
-        // Arrange
         when(postRepository.existsById(1L)).thenReturn(true);
         doThrow(RuntimeException.class)
                 .when(reviewClient).deleteReviewsByPostId(1L);
 
-        // Act & Assert
         assertThrows(PostDeletionException.class, () -> postService.deletePost(1L));
         verify(postRepository).existsById(1L);
         verify(reviewClient).deleteReviewsByPostId(1L);
@@ -318,7 +277,6 @@ public class PostServiceTest {
 
     @Test
     void processReviewMessage_ThrowsException() {
-        // Arrange
         ReviewDTO reviewDTO = new ReviewDTO(
                 1L,
                 ReviewStatus.PUBLISHED,
@@ -329,17 +287,14 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(postRepository.save(any(Post.class))).thenThrow(new RuntimeException("Save failed"));
 
-        // Act
-        postService.processReviewMessage(reviewDTO); // Should not throw exception but log error
+        postService.processReviewMessage(reviewDTO);
 
-        // Assert
         verify(postRepository).findById(1L);
         verify(postRepository).save(any(Post.class));
     }
 
     @Test
     void updatePost_NotFound() {
-        // Arrange
         LocalDateTime now = LocalDateTime.now();
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
         Post updatedPostData = Post.builder()
@@ -352,10 +307,8 @@ public class PostServiceTest {
                 .status(ReviewStatus.DRAFT)
                 .build();
 
-        // Act
         Optional<Post> result = postService.updatePost(1L, updatedPostData);
 
-        // Assert
         assertTrue(result.isEmpty());
         verify(postRepository).findById(1L);
         verify(postRepository, never()).save(any(Post.class));
@@ -363,13 +316,10 @@ public class PostServiceTest {
 
     @Test
     void updateStatus_NotFound() {
-        // Arrange
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act
         Optional<Post> result = postService.updateStatus(1L, "PUBLISHED");
 
-        // Assert
         assertTrue(result.isEmpty());
         verify(postRepository).findById(1L);
         verify(postRepository, never()).save(any(Post.class));

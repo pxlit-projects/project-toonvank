@@ -31,7 +31,6 @@ describe('ReviewService', () => {
         httpMock = TestBed.inject(HttpTestingController);
         articleService = TestBed.inject(ArticleService) as jasmine.SpyObj<ArticleService>;
 
-        // Handle the initial loadReviews call from constructor
         const req = httpMock.expectOne(endpoint);
         req.flush(mockReviews);
     });
@@ -118,7 +117,6 @@ describe('ReviewService', () => {
             expect(req.request.method).toBe('POST');
             req.flush(expectedReview);
 
-            // Handle the loadReviews call
             const reloadReq = httpMock.expectOne(endpoint);
             const updatedMockReviews = [...mockReviews, expectedReviewDTO];
             reloadReq.flush(updatedMockReviews);
@@ -141,7 +139,6 @@ describe('ReviewService', () => {
             expect(req.request.method).toBe('PUT');
             req.flush({});
 
-            // Handle the loadReviews call
             const reloadReq = httpMock.expectOne(endpoint);
             const updatedMockReviews = mockReviews.map(r =>
                 r.id === 1 ? { ...r, ...updatedReview } : r
@@ -160,7 +157,6 @@ describe('ReviewService', () => {
             expect(req.request.method).toBe('DELETE');
             req.flush({});
 
-            // Handle the loadReviews call
             const reloadReq = httpMock.expectOne(endpoint);
             const updatedMockReviews = mockReviews.filter(r => r.id !== 1);
             reloadReq.flush(updatedMockReviews);
@@ -173,7 +169,6 @@ describe('ReviewService', () => {
         it('should update review status and reload reviews', () => {
             const updatedStatus = ReviewStatus.APPROVED;
 
-            // Access private method through type assertion
             (service as any).updateReviewStatus(1, updatedStatus);
 
             const req = httpMock.expectOne(`${endpoint}/1/updateStatus`);
@@ -181,7 +176,6 @@ describe('ReviewService', () => {
             expect(req.request.body).toEqual({ status: updatedStatus });
             req.flush({});
 
-            // Handle the loadReviews call
             const reloadReq = httpMock.expectOne(endpoint);
             const updatedMockReviews = mockReviews.map(r =>
                 r.id === 1 ? { ...r, status: updatedStatus } : r
@@ -196,7 +190,6 @@ describe('ReviewService', () => {
         it('should update article status and trigger article service reload', () => {
             const newStatus = 'PUBLISHED';
 
-            // Access private method through type assertion
             (service as any).updateArticleStatus(1, newStatus);
 
             const req = httpMock.expectOne(`${endpoint}/1/updateStatus`);
@@ -212,17 +205,14 @@ describe('ReviewService', () => {
         it('should handle errors in all operations', () => {
             const consoleErrorSpy = spyOn(console, 'error');
 
-            // Test create error
             service.createReview({}).subscribe({
                 error: (error) => expect(error.message).toBe('An error occurred. Please try again later.')
             });
             httpMock.expectOne(endpoint).error(new ErrorEvent('Network error'));
 
-            // Test update error
             service.updateReview(1, {});
             httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
 
-            // Test delete error
             service.deleteReview(1);
             httpMock.expectOne(`${endpoint}/1`).error(new ErrorEvent('Network error'));
 

@@ -151,13 +151,11 @@ import { ReviewStatus } from '../../models/review.model';
   `]
 })
 export class DraftsComponent implements OnInit {
-  // Use signals for reactive state management
   private draftsSignal = signal<ArticleDTO[]>([]);
   private rejectedSignal = signal<ArticleDTO[]>([]);
   private pendingSignal = signal<ArticleDTO[]>([]);
   private reviewsSignal = signal<ReviewDTO[]>([]);
 
-  // Expose signals as getters
   drafts = this.draftsSignal.asReadonly();
   rejected = this.rejectedSignal.asReadonly();
   pending = this.pendingSignal.asReadonly();

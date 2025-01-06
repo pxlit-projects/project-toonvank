@@ -53,13 +53,10 @@ class ReviewServiceTest {
 
     @Test
     void createReview_ShouldSaveReviewAndSendToQueue() {
-        // Arrange
         when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
-        // Act
         Review createdReview = reviewService.createReview(mockReview);
 
-        // Assert
         assertNull(mockReview.getId());
         verify(rabbitTemplate).convertAndSend(eq("reviewQueue"), any(ReviewDTO.class));
         verify(reviewRepository).save(mockReview);
@@ -68,33 +65,26 @@ class ReviewServiceTest {
 
     @Test
     void getReviewById_ExistingReview_ShouldReturnReview() {
-        // Arrange
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
 
-        // Act
         Optional<Review> foundReview = reviewService.getReviewById(mockReviewId);
 
-        // Assert
         assertTrue(foundReview.isPresent());
         assertEquals(mockReview, foundReview.get());
     }
 
     @Test
     void getAllReviews_ShouldReturnListOfReviews() {
-        // Arrange
         List<Review> mockReviews = Collections.singletonList(mockReview);
         when(reviewRepository.findAll()).thenReturn(mockReviews);
 
-        // Act
         List<Review> reviews = reviewService.getAllReviews();
 
-        // Assert
         assertEquals(mockReviews, reviews);
     }
 
     @Test
     void updateReview_ExistingReview_ShouldUpdateAndSave() {
-        // Arrange
         Review updatedReviewData = Review.builder()
                 .postId(200L)
                 .status(ReviewStatus.PUBLISHED)
@@ -104,10 +94,8 @@ class ReviewServiceTest {
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.of(mockReview));
         when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
-        // Act
         Review updatedReview = reviewService.updateReview(mockReviewId, updatedReviewData);
 
-        // Assert
         assertEquals(200L, updatedReview.getPostId());
         assertEquals(ReviewStatus.PUBLISHED, updatedReview.getStatus());
         assertEquals("Updated review", updatedReview.getComment());
@@ -116,10 +104,8 @@ class ReviewServiceTest {
 
     @Test
     void updateReview_NonExistingReview_ShouldThrowException() {
-        // Arrange
         when(reviewRepository.findById(mockReviewId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(IllegalArgumentException.class, () ->
                 reviewService.updateReview(mockReviewId, mockReview)
         );
@@ -127,22 +113,17 @@ class ReviewServiceTest {
 
     @Test
     void deleteReview_ExistingReview_ShouldDelete() {
-        // Arrange
         when(reviewRepository.existsById(mockReviewId)).thenReturn(true);
 
-        // Act
         reviewService.deleteReview(mockReviewId);
 
-        // Assert
         verify(reviewRepository).deleteById(mockReviewId);
     }
 
     @Test
     void deleteReview_NonExistingReview_ShouldThrowException() {
-        // Arrange
         when(reviewRepository.existsById(mockReviewId)).thenReturn(false);
 
-        // Act & Assert
         assertThrows(IllegalArgumentException.class, () ->
                 reviewService.deleteReview(mockReviewId)
         );
@@ -150,37 +131,29 @@ class ReviewServiceTest {
 
     @Test
     void getReviewsByPostId_ShouldReturnReviews() {
-        // Arrange
         List<Review> mockReviews = Collections.singletonList(mockReview);
         when(reviewRepository.findByPostId(mockPostId)).thenReturn(mockReviews);
 
-        // Act
         List<Review> reviews = reviewService.getReviewsByPostId(mockPostId);
 
-        // Assert
         assertEquals(mockReviews, reviews);
     }
 
     @Test
     void getReviewsByStatus_ShouldReturnReviews() {
-        // Arrange
         ReviewStatus status = ReviewStatus.DRAFT;
         List<Review> mockReviews = Collections.singletonList(mockReview);
         when(reviewRepository.findByStatus(status)).thenReturn(mockReviews);
 
-        // Act
         List<Review> reviews = reviewService.getReviewsByStatus(status);
 
-        // Assert
         assertEquals(mockReviews, reviews);
     }
 
     @Test
     void deleteReviewsByPostId_ShouldDeleteReviews() {
-        // Act
         reviewService.deleteReviewsByPostId(mockPostId);
 
-        // Assert
         verify(reviewRepository).deleteByPostId(mockPostId);
     }
 }

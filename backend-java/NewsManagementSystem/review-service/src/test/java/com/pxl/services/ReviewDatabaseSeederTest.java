@@ -35,32 +35,25 @@ class ReviewDatabaseSeederTest {
 
     @Test
     void run_ShouldCallSeedReviews() throws Exception {
-        // Arrange
         when(reviewRepository.count()).thenReturn(0L);
 
-        // Act
         seeder.run();
 
-        // Assert
         verify(reviewRepository).count();
         verify(reviewRepository).saveAll(any());
     }
 
     @Test
     void seedReviews_WhenDatabaseEmpty_ShouldSaveReviews() throws Exception {
-        // Arrange
         when(reviewRepository.count()).thenReturn(0L);
 
-        // Act
         seeder.run();
 
-        // Assert
         verify(reviewRepository).saveAll(reviewListCaptor.capture());
         List<Review> savedReviews = reviewListCaptor.getValue();
 
         assertEquals(3, savedReviews.size());
 
-        // Verify first review
         Review firstReview = savedReviews.get(0);
         assertAll("First Review Verification",
                 () -> assertEquals(1L, firstReview.getPostId()),
@@ -69,7 +62,6 @@ class ReviewDatabaseSeederTest {
                 () -> assertNotNull(firstReview.getReviewedAt())
         );
 
-        // Verify second review
         Review secondReview = savedReviews.get(1);
         assertAll("Second Review Verification",
                 () -> assertEquals(1L, secondReview.getPostId()),
@@ -78,7 +70,6 @@ class ReviewDatabaseSeederTest {
                 () -> assertNotNull(secondReview.getReviewedAt())
         );
 
-        // Verify third review
         Review thirdReview = savedReviews.get(2);
         assertAll("Third Review Verification",
                 () -> assertEquals(2L, thirdReview.getPostId()),
@@ -90,26 +81,20 @@ class ReviewDatabaseSeederTest {
 
     @Test
     void seedReviews_WhenDatabaseNotEmpty_ShouldNotSaveReviews() throws Exception {
-        // Arrange
         when(reviewRepository.count()).thenReturn(1L);
 
-        // Act
         seeder.run();
 
-        // Assert
         verify(reviewRepository, never()).saveAll(any());
     }
 
     @Test
     void seedReviews_ShouldSetCorrectTimestamps() throws Exception {
-        // Arrange
         when(reviewRepository.count()).thenReturn(0L);
         LocalDateTime beforeTest = LocalDateTime.now();
 
-        // Act
         seeder.run();
 
-        // Assert
         verify(reviewRepository).saveAll(reviewListCaptor.capture());
         List<Review> savedReviews = reviewListCaptor.getValue();
 
@@ -128,17 +113,13 @@ class ReviewDatabaseSeederTest {
 
     @Test
     void seedReviews_ShouldUseBuilderPattern() throws Exception {
-        // Arrange
         when(reviewRepository.count()).thenReturn(0L);
 
-        // Act
         seeder.run();
 
-        // Assert
         verify(reviewRepository).saveAll(reviewListCaptor.capture());
         List<Review> savedReviews = reviewListCaptor.getValue();
 
-        // Verify builder pattern was used correctly
         assertAll("Builder Pattern Verification",
                 () -> assertNotNull(savedReviews.get(0)),
                 () -> assertNotNull(savedReviews.get(1)),

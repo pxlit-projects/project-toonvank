@@ -92,7 +92,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class ArticleListComponent {
   private articleService = inject(ArticleService);
 
-  // Signals for reactive state management
   articles = signal<ArticleDTO[]>([]);
   searchTerm = signal('');
   selectedCategory = signal('');
@@ -100,7 +99,6 @@ export class ArticleListComponent {
   endDate = signal<Date | null>(null);
   selectedAuthor = signal('');
 
-  // Computed unique authors
   uniqueAuthors = computed(() =>
       [...new Set(this.articles().map((article) => article.author))]
   );
@@ -130,7 +128,6 @@ export class ArticleListComponent {
   });
 
   constructor() {
-    // Use effect for loading articles
     effect(() => {
       const articles = this.articleService.getArticles();
       this.articles.set(articles);
