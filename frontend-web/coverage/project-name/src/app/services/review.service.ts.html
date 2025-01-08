@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.47% </span>
+                <span class="strong">97.29% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>38/42</span>
+                <span class='fraction'>36/37</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/10</span>
+                <span class='fraction'>4/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.55% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>28/29</span>
+                <span class='fraction'>28/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.17% </span>
+                <span class="strong">96.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>31/34</span>
+                <span class='fraction'>29/30</span>
             </div>
         
             
@@ -170,18 +170,7 @@
 <a name='L105'></a><a href='#L105'>105</a>
 <a name='L106'></a><a href='#L106'>106</a>
 <a name='L107'></a><a href='#L107'>107</a>
-<a name='L108'></a><a href='#L108'>108</a>
-<a name='L109'></a><a href='#L109'>109</a>
-<a name='L110'></a><a href='#L110'>110</a>
-<a name='L111'></a><a href='#L111'>111</a>
-<a name='L112'></a><a href='#L112'>112</a>
-<a name='L113'></a><a href='#L113'>113</a>
-<a name='L114'></a><a href='#L114'>114</a>
-<a name='L115'></a><a href='#L115'>115</a>
-<a name='L116'></a><a href='#L116'>116</a>
-<a name='L117'></a><a href='#L117'>117</a>
-<a name='L118'></a><a href='#L118'>118</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L108'></a><a href='#L108'>108</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -285,25 +274,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { inject, Injectable, signal, computed } from '@angular/core';
-import { Observable, map, catchError, throwError, tap, of } from 'rxjs';
+import { Observable, map, catchError, throwError, tap } from 'rxjs';
 import { Review, ReviewDTO, ReviewStatus } from '../models/review.model';
 import { HttpClient } from '@angular/common/http';
 import { ArticleService } from './article.service';
 import { Article } from '../models/article.model';
-import { HttpErrorResponse } from '@angular/common/http';
 &nbsp;
 @Injectable({
   providedIn: 'root',
@@ -347,7 +326,7 @@ export class ReviewService {
   }
 &nbsp;
   getApprovedReviews(): ReviewDTO[] {
-    return computed(() =&gt; this.reviews().filter((review) =&gt; review.status === ReviewStatus.APPROVED))();
+    return computed(() =&gt; this.reviews().filter((review) =&gt; review.status === ReviewStatus.PUBLISHED))();
   }
 &nbsp;
   getRejectedReviews(): ReviewDTO[] {
@@ -402,15 +381,6 @@ export class ReviewService {
   private handleError&lt;T&gt;(operation = <span class="branch-0 cbranch-no" title="branch not covered" >'operation',</span> result?: T) {
     return (error: any): Observable&lt;T&gt; =&gt; {
       console.error(`${operation} failed:`, error);
-      
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (result !== undefined) {
-<span class="cstat-no" title="statement not covered" >        return of(result);</span>
-      }
-  
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (error instanceof Error) {
-<span class="cstat-no" title="statement not covered" >        return throwError(<span class="fstat-no" title="function not covered" >() =</span>&gt; <span class="cstat-no" title="statement not covered" >error)</span>;</span>
-      }
-  
       return throwError(() =&gt; new Error('An error occurred. Please try again later.'));
     };
   }
@@ -421,7 +391,7 @@ export class ReviewService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-01-06T16:49:05.063Z
+                at 2025-01-08T17:51:45.030Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

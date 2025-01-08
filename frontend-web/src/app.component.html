@@ -1,0 +1,48 @@
+<mat-toolbar color="primary">
+    <div class="container mx-auto flex items-center justify-between">
+        <div class="flex gap-4">
+            <a mat-button routerLink="/articles">
+                <mat-icon>article</mat-icon>
+                Articles
+            </a>
+            <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
+                <a mat-button routerLink="/editor">
+                    <mat-icon>edit</mat-icon>
+                    New Article
+                </a>
+                <a mat-button routerLink="/drafts">
+                    <mat-icon>drafts</mat-icon>
+                    My Drafts
+                </a>
+            </ng-container>
+            <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
+                <a mat-button routerLink="/review">
+                    <mat-icon>rate_review</mat-icon>
+                    Review Queue
+                </a>
+            </ng-container>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="text-sm">{{ userRole?.toString() }}</span>
+
+            <ng-container *ngIf="!userRole">
+                <a mat-button routerLink="/login">
+                    <mat-icon>login</mat-icon>
+                    Login
+                </a>
+            </ng-container>
+            <ng-container *ngIf="userRole">
+                <button mat-icon-button routerLink="/login" title="Switch User">
+                    <mat-icon>switch_account</mat-icon>
+                </button>
+                <button mat-button (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    Logout
+                </button>
+            </ng-container>
+        </div>
+    </div>
+</mat-toolbar>
+
+<router-outlet></router-outlet>
