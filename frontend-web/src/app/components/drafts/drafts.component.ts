@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ArticleDTO } from '../../models/article.model';
 import { ReviewDTO } from '../../models/review.model';
 import { ReviewStatus } from '../../models/review.model';
+import Swal from "sweetalert2";
 
 @Component({
   selector: 'app-drafts',
@@ -108,10 +109,41 @@ export class DraftsComponent implements OnInit {
   }
 
   deleteDraft(id: number) {
-    const draft = this.draftsSignal().find(d => d.id === id);
-    if (draft && this.isAuthor(draft) && confirm('Are you sure you want to delete this draft?')) {
-      this.articleService.deleteArticle(id);
-      this.loadDrafts();
+    const article = this.draftsSignal().find(d => d.id === id) ||
+        this.pendingSignal().find(d => d.id === id) ||
+        this.rejectedSignal().find(d => d.id === id);
+
+    if (article && this.isAuthor(article)) {
+      Swal.fire({
+        title: 'Delete Article',
+        text: 'Are you sure you want to delete this article?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          try {
+            this.articleService.deleteArticle(id);
+            this.loadDrafts();
+            this.loadPendingArticles();
+            this.loadRejectedArticles();
+            Swal.fire(
+                'Deleted!',
+                'Your article has been deleted.',
+                'success'
+            );
+          } catch (error) {
+            Swal.fire(
+                'Error!',
+                'Failed to delete the article.',
+                'error'
+            );
+          }
+        }
+      });
     }
   }
 
