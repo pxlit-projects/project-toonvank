@@ -82,7 +82,7 @@ export class ReviewQueueComponent implements OnInit {
   }
 
   approveArticle(article: ArticleDTO) {
-    this.createReviewForArticle(article, ReviewStatus.APPROVED).subscribe({
+    this.createReviewForArticle(article, ReviewStatus.PUBLISHED).subscribe({
       next: (review) => {
         this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
         this.loadPendingArticles();

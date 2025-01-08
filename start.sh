@@ -44,10 +44,15 @@ main() {
     docker rmi $(docker images | grep 'frontend-web' | awk '{print $3}') 2>/dev/null || true
     docker builder prune -f
 
+    # Clean backend
+    docker rm -vf $(docker ps -a --format "{{.Names}}" | grep -E '(db|service)$')
+
+    docker rm -f front-end rabbitmq commentservicedb postservicedb reviewservicedb config-service discovery-service messaging-service review-service post-service comment-service gateway-service
+
     # Run docker-compose
     green "Starting Docker containers..."
     docker compose down -v
-    docker-compose up -d
+    docker-compose up -d --force-recreate
     check_status "Docker Compose"
 
     green "Setup completed successfully!"

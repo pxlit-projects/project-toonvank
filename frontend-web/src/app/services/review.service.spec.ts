@@ -12,7 +12,7 @@ describe('ReviewService', () => {
 
     const mockReviews: ReviewDTO[] = [
         { id: 1, postId: 1, status: ReviewStatus.PENDING, comment: 'Pending review', reviewedAt: new Date().toISOString() },
-        { id: 2, postId: 2, status: ReviewStatus.APPROVED, comment: 'Approved review', reviewedAt: new Date().toISOString() },
+        { id: 2, postId: 2, status: ReviewStatus.PUBLISHED, comment: 'Approved review', reviewedAt: new Date().toISOString() },
         { id: 3, postId: 3, status: ReviewStatus.REJECTED, comment: 'Rejected review', reviewedAt: new Date().toISOString() }
     ];
 
@@ -80,7 +80,7 @@ describe('ReviewService', () => {
         it('should return approved reviews', () => {
             const approvedReviews = service.getApprovedReviews();
             expect(approvedReviews.length).toBe(1);
-            expect(approvedReviews[0].status).toBe(ReviewStatus.APPROVED);
+            expect(approvedReviews[0].status).toBe(ReviewStatus.PUBLISHED);
         });
 
         it('should return rejected reviews', () => {
@@ -130,7 +130,7 @@ describe('ReviewService', () => {
             const updatedReview: Partial<ReviewDTO> = {
                 id: 1,
                 comment: 'Updated review',
-                status: ReviewStatus.APPROVED
+                status: ReviewStatus.PUBLISHED
             };
 
             service.updateReview(1, updatedReview);
@@ -167,7 +167,7 @@ describe('ReviewService', () => {
 
     describe('updateReviewStatus', () => {
         it('should update review status and reload reviews', () => {
-            const updatedStatus = ReviewStatus.APPROVED;
+            const updatedStatus = ReviewStatus.PUBLISHED;
 
             (service as any).updateReviewStatus(1, updatedStatus);
 

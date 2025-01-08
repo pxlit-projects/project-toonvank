@@ -30,8 +30,8 @@ public class PostDatabaseSeeder {
             post1.setAuthor("John Doe");
             post1.setCategory("updates");
             post1.setStatus(ReviewStatus.PUBLISHED);
-            post1.setCreatedAt(LocalDateTime.now());
-            post1.setUpdatedAt(LocalDateTime.now());
+            post1.setCreatedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
+            post1.setUpdatedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
 
             Post post2 = new Post();
             post2.setTitle("Advanced Spring Security");
@@ -39,8 +39,8 @@ public class PostDatabaseSeeder {
             post2.setAuthor("Jane Smith");
             post2.setCategory("announcements");
             post2.setStatus(ReviewStatus.PUBLISHED);
-            post2.setCreatedAt(LocalDateTime.now());
-            post2.setUpdatedAt(LocalDateTime.now());
+            post2.setCreatedAt(LocalDateTime.of(2023, 1, 1, 0, 0));
+            post2.setUpdatedAt(LocalDateTime.of(2023, 1, 1, 0, 0));
 
             Post post3 = new Post();
             post3.setTitle("Advanced Spring Security");
@@ -48,8 +48,8 @@ public class PostDatabaseSeeder {
             post3.setAuthor("Jane Smith");
             post3.setCategory("announcements");
             post3.setStatus(ReviewStatus.PUBLISHED);
-            post3.setCreatedAt(LocalDateTime.now().minusMonths(2));
-            post3.setUpdatedAt(LocalDateTime.now());
+            post3.setCreatedAt(LocalDateTime.of(2023, 2, 1, 0, 0));
+            post3.setUpdatedAt(LocalDateTime.of(2023, 4, 1, 0, 0));
 
             postRepository.save(post1);
             postRepository.save(post2);

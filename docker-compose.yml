@@ -69,6 +69,7 @@ services:
       retries: 10
 
   config-service:
+    container_name: config-service
     build:
       context: ./backend-java/NewsManagementSystem
       dockerfile: ./config-service/Dockerfile
@@ -96,6 +97,7 @@ services:
       - spring-cloud-network
 
   messaging-service:
+    container_name: messaging-service
     build:
       context: ./backend-java/NewsManagementSystem
       dockerfile: ./messaging-service/Dockerfile
@@ -127,6 +129,7 @@ services:
       - spring-cloud-network
 
   post-service:
+    container_name: post-service
     build:
       context: ./backend-java/NewsManagementSystem
       dockerfile: ./post-service/Dockerfile
@@ -140,6 +143,7 @@ services:
       - spring-cloud-network
 
   comment-service:
+    container_name: comment-service
     build:
       context: ./backend-java/NewsManagementSystem
       dockerfile: ./comment-service/Dockerfile
@@ -152,6 +156,7 @@ services:
       - spring-cloud-network
 
   gateway-service:
+    container_name: gateway-service
     build:
       context: ./backend-java/NewsManagementSystem
       dockerfile: ./gateway-service/Dockerfile

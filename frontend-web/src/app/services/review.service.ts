@@ -47,7 +47,7 @@ export class ReviewService {
   }
 
   getApprovedReviews(): ReviewDTO[] {
-    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.APPROVED))();
+    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.PUBLISHED))();
   }
 
   getRejectedReviews(): ReviewDTO[] {

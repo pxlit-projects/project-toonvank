@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-article-list',
@@ -29,11 +30,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatButtonModule
   ],
   template: `
     <div class="container mx-auto p-4">
-      <div class="mb-4 flex gap-4">
+      <div class="mb-4 flex gap-4 flex-wrap items-end">
         <mat-form-field>
           <mat-label>Search articles & authors</mat-label>
           <input matInput [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
@@ -52,7 +54,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         <mat-form-field>
           <mat-label>Author</mat-label>
           <mat-select [ngModel]="selectedAuthor()" (ngModelChange)="selectedAuthor.set($event)">
-            <mat-option value="" disabled>Select an author</mat-option>
+            <mat-option value="">All Authors</mat-option>
             @for (author of uniqueAuthors(); track author) {
               <mat-option [value]="author">
                 {{ author }}
@@ -63,17 +65,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
         <mat-form-field>
           <mat-label>Start date</mat-label>
-          <input matInput [matDatepicker]="startPicker" [ngModel]="startDate()" (ngModelChange)="startDate.set($event)">
+          <input matInput [matDatepicker]="startPicker" [ngModel]="startDate()" (ngModelChange)="setStartDate($event)">
           <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
           <mat-datepicker #startPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>End date</mat-label>
-          <input matInput [matDatepicker]="endPicker" [ngModel]="endDate()" (ngModelChange)="endDate.set($event)">
+          <input matInput [matDatepicker]="endPicker" [ngModel]="endDate()" (ngModelChange)="setEndDate($event)">
           <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
           <mat-datepicker #endPicker></mat-datepicker>
         </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="clearFilters()">
+          Clear Filters
+        </button>
       </div>
 
       <div class="grid gap-4">
@@ -108,6 +114,7 @@ export class ArticleListComponent {
       const isPublished = article.status === 'PUBLISHED';
 
       const matchesSearch =
+          !this.searchTerm() ||
           article.title.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
           article.content.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
           article.author.toLowerCase().includes(this.searchTerm().toLowerCase());
@@ -115,10 +122,29 @@ export class ArticleListComponent {
       const matchesCategory =
           !this.selectedCategory() || article.category === this.selectedCategory();
 
+      // Convert article date string to Date object and normalize
       const articleDate = new Date(article.updatedAt);
+      articleDate.setHours(0, 0, 0, 0);
+
+      // Get filter dates
+      const startDate = this.startDate();
+      const endDate = this.endDate();
+
+      // Add one day to end date to include the entire day
+      const adjustedEndDate = endDate ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000) : null;
+
+      // Debug logging
+      console.log('Article date:', articleDate);
+      console.log('Start date:', startDate);
+      console.log('End date:', endDate);
+      console.log('Adjusted end date:', adjustedEndDate);
+
       const matchesDate =
-          (!this.startDate() || articleDate >= this.startDate()!) &&
-          (!this.endDate() || articleDate <= this.endDate()!);
+          (!startDate || articleDate.getTime() >= startDate.getTime()) &&
+          (!endDate || articleDate.getTime() < adjustedEndDate!.getTime());
+
+      // Debug logging for match result
+      console.log('Matches date:', matchesDate);
 
       const matchesAuthor =
           !this.selectedAuthor() || article.author === this.selectedAuthor();
@@ -132,5 +158,35 @@ export class ArticleListComponent {
       const articles = this.articleService.getArticles();
       this.articles.set(articles);
     });
+  }
+
+  // Set dates with proper handling
+  setStartDate(date: Date | null) {
+    if (date) {
+      const normalized = new Date(date);
+      normalized.setHours(0, 0, 0, 0);
+      this.startDate.set(normalized);
+    } else {
+      this.startDate.set(null);
+    }
+  }
+
+  setEndDate(date: Date | null) {
+    if (date) {
+      const normalized = new Date(date);
+      normalized.setHours(0, 0, 0, 0);
+      this.endDate.set(normalized);
+    } else {
+      this.endDate.set(null);
+    }
+  }
+
+  // Clear all filters
+  clearFilters() {
+    this.searchTerm.set('');
+    this.selectedCategory.set('');
+    this.selectedAuthor.set('');
+    this.startDate.set(null);
+    this.endDate.set(null);
   }
 }

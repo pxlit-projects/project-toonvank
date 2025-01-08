@@ -35,7 +35,7 @@ const roleGuard = (requiredRoles: UserRole[]) => {
 const routes: Routes = [
   { path: 'articles', component: ArticleListComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur, UserRole.Gebruiker])] },
   { path: 'editor', component: ArticleEditorComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur])] },
-  { path: 'review', component: ReviewQueueComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur])] },
+  { path: 'review', component: ReviewQueueComponent, canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])] },
   { path: 'drafts', component: DraftsComponent, canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])] },
   { path: 'login', component: LoginComponent },
   { path: '**', redirectTo: '/login' }
@@ -71,7 +71,7 @@ const routes: Routes = [
               My Drafts
             </a>
           </ng-container>
-          <ng-container *ngIf="isHoofdredacteur()">
+          <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
             <a mat-button routerLink="/review">
               <mat-icon>rate_review</mat-icon>
               Review Queue
