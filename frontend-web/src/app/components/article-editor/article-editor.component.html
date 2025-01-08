@@ -1,0 +1,50 @@
+<div class="container">
+    <form (ngSubmit)="saveArticle()" class="form-container">
+        <mat-form-field class="form-field">
+            <mat-label>Title</mat-label>
+            <input
+                    matInput
+                    type="text"
+                    [(ngModel)]="article.title"
+                    name="title"
+                    required
+            />
+        </mat-form-field>
+
+        <mat-form-field class="form-field">
+            <mat-label>Category</mat-label>
+            <mat-select
+                    [(ngModel)]="article.category"
+                    name="category"
+                    required
+            >
+                <mat-option value="news">News</mat-option>
+                <mat-option value="updates">Updates</mat-option>
+                <mat-option value="announcements">Announcements</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <div class="editor-container">
+            <label class="editor-label">Content</label>
+            <quill-editor
+                    name="content"
+                    [(ngModel)]="article.content"
+            ></quill-editor>
+        </div>
+
+        <div class="button-container">
+            @if (article.status === 'DRAFT') {
+                <button mat-raised-button color="primary" type="submit">
+                    Save as Draft
+                </button>
+                <button mat-raised-button color="accent" type="button" (click)="submitForReview()">
+                    Submit for Review
+                </button>
+            } @else {
+                <button mat-raised-button color="primary" type="submit">
+                    Save
+                </button>
+            }
+        </div>
+    </form>
+</div>

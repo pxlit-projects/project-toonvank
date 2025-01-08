@@ -33,73 +33,8 @@ import { MatButtonModule } from '@angular/material/button';
         MatFormFieldModule,
         MatButtonModule
     ],
-    template: `
-        <div class="container mx-auto p-4">
-            <div class="mb-4 flex justify-between items-start">
-                <div class="flex gap-4 flex-wrap items-end">
-                    <mat-form-field>
-                        <mat-label>Search articles & authors</mat-label>
-                        <input matInput [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
-                    </mat-form-field>
-
-                    <mat-form-field>
-                        <mat-label>Category</mat-label>
-                        <mat-select [ngModel]="selectedCategory()" (ngModelChange)="selectedCategory.set($event)">
-                            <mat-option value="">All Categories</mat-option>
-                            <mat-option value="news">News</mat-option>
-                            <mat-option value="updates">Updates</mat-option>
-                            <mat-option value="announcements">Announcements</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-
-                    <mat-form-field>
-                        <mat-label>Author</mat-label>
-                        <mat-select [ngModel]="selectedAuthor()" (ngModelChange)="selectedAuthor.set($event)">
-                            <mat-option value="">All Authors</mat-option>
-                            @for (author of uniqueAuthors(); track author) {
-                                <mat-option [value]="author">
-                                    {{ author }}
-                                </mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-
-                    <mat-form-field>
-                        <mat-label>Start date</mat-label>
-                        <input matInput [matDatepicker]="startPicker" [ngModel]="startDate()" (ngModelChange)="setStartDate($event)">
-                        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #startPicker></mat-datepicker>
-                    </mat-form-field>
-
-                    <mat-form-field>
-                        <mat-label>End date</mat-label>
-                        <input matInput [matDatepicker]="endPicker" [ngModel]="endDate()" (ngModelChange)="setEndDate($event)">
-                        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #endPicker></mat-datepicker>
-                    </mat-form-field>
-                </div>
-
-                <button mat-raised-button
-                        color="primary"
-                        (click)="clearFilters()"
-                        [disabled]="!hasActiveFilters()"
-                        class="ml-4 mt-2">
-                    Clear All Filters
-                </button>
-            </div>
-
-            <div class="grid gap-4">
-                @if (filteredArticles().length === 0) {
-                    <p class="text-gray-600">No articles found.</p>
-                }
-                @for (article of filteredArticles(); track article.id) {
-                    <app-article-card [article]="article">
-                        <app-comment-section [articleId]="article.id"></app-comment-section>
-                    </app-article-card>
-                }
-            </div>
-        </div>
-    `,
+    templateUrl: './article-list.component.html',
+    styleUrls: ['./article-list.component.css']
 })
 export class ArticleListComponent {
     private articleService = inject(ArticleService);

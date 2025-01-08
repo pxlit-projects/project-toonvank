@@ -1,0 +1,21 @@
+:host {
+    display: block;
+    width: 100%;
+}
+mat-card-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+mat-card-actions {
+    padding: 16px;
+    display: flex;
+    gap: 8px;
+}
+.action-buttons {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+}

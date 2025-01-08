@@ -15,6 +15,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { routes } from './app.routes';
 
 const roleGuard = (requiredRoles: UserRole[]) => {
   const authService = inject(AuthenticationService);
@@ -31,15 +32,6 @@ const roleGuard = (requiredRoles: UserRole[]) => {
     return false;
   }
 };
-
-const routes: Routes = [
-  { path: 'articles', component: ArticleListComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur, UserRole.Gebruiker])] },
-  { path: 'editor', component: ArticleEditorComponent, canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur])] },
-  { path: 'review', component: ReviewQueueComponent, canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])] },
-  { path: 'drafts', component: DraftsComponent, canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])] },
-  { path: 'login', component: LoginComponent },
-  { path: '**', redirectTo: '/login' }
-];
 
 @Component({
   selector: 'app-root',

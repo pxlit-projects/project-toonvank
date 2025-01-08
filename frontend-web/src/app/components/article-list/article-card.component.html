@@ -1,0 +1,32 @@
+<mat-card class="w-full">
+    <mat-card-header>
+        <mat-card-title>{{ article.title }}</mat-card-title>
+        <mat-card-subtitle>Category: {{ article.category }}</mat-card-subtitle>
+        <div class="action-buttons">
+            <button *ngIf="isAuthor() && isAllowedToEdit"
+                    mat-icon-button
+                    color="primary"
+                    class="edit-button"
+                    [routerLink]="['/editor']"
+                    [queryParams]="{ id: article.id }">
+                <mat-icon>edit</mat-icon>
+            </button>
+            <button *ngIf="isAuthor() && isAllowedToEdit"
+                    mat-icon-button
+                    color="warn"
+                    class="delete-button"
+                    (click)="deleteArticle()">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </div>
+    </mat-card-header>
+    <mat-card-content>
+        <p [innerHTML]="article.content"></p>
+        <p class="text-sm text-gray-500 mt-2">
+            Last updated: {{ article.updatedAt | date: 'medium' }}
+        </p>
+    </mat-card-content>
+    <mat-card-actions class="px-4 w-full">
+        <ng-content></ng-content>
+    </mat-card-actions>
+</mat-card>

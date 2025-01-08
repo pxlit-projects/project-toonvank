@@ -1,0 +1,84 @@
+@if (comments().length) {
+    <div class="w-full">
+        @for (comment of comments(); track comment.id) {
+            <mat-card class="mb-4 w-full">
+                <mat-card-content>
+                    @if (editingCommentId() === comment.id) {
+                        <mat-form-field class="w-full">
+                                    <textarea
+                                            matInput
+                                            [ngModel]="editableCommentContent()"
+                                            (ngModelChange)="editableCommentContent.set($event)"
+                                            rows="3"
+                                            placeholder="Edit comment"
+                                    ></textarea>
+                        </mat-form-field>
+                        <div class="flex gap-2">
+                            <button
+                                    mat-raised-button
+                                    color="primary"
+                                    (click)="saveEdit(comment)"
+                            >
+                                <mat-icon>save</mat-icon>
+                                Save
+                            </button>
+                            <button
+                                    mat-raised-button
+                                    (click)="cancelEdit()"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    } @else {
+                        <p>{{ comment.content }}</p>
+                        <p class="text-sm text-gray-500 mt-2">Posted by: {{ comment.postedBy }}</p>
+                        <div class="flex gap-2 mt-2">
+                            <button
+                                    mat-icon-button
+                                    color="accent"
+                                    (click)="startEdit(comment)"
+                            >
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button
+                                    mat-icon-button
+                                    color="warn"
+                                    (click)="deleteComment(comment)"
+                            >
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+        }
+    </div>
+} @else {
+    @if (showNoCommentsYet) {
+        <p class="text-sm text-gray-500 mt-2">No comments yet.</p>
+    }
+}
+
+@if (isAllowedToAdd) {
+    <div class="mt-4 w-full flex items-center gap-4">
+        <mat-form-field class="flex-grow">
+            <input
+                    matInput
+                    [ngModel]="newComment()"
+                    (ngModelChange)="updateNewComment($event)"
+                    placeholder="Add a comment..."
+                    (keyup.enter)="addComment()"
+            />
+        </mat-form-field>
+        @if (isAllowedToPost) {
+            <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="addComment()"
+                    class="h-14"
+            >
+                Post
+            </button>
+        }
+    </div>
+}

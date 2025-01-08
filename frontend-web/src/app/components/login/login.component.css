@@ -1,0 +1,7 @@
+:host {
+    display: block;
+    height: 100vh;
+}
+mat-form-field {
+    width: 100%;
+}

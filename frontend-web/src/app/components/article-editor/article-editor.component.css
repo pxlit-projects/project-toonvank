@@ -1,0 +1,33 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.form-container {
+    max-width: 42rem;
+    margin: 0 auto;
+}
+
+.form-field {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.editor-container {
+    margin-bottom: 1rem;
+}
+
+.editor-label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.button-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+:host ::ng-deep .ql-container {
+    min-height: 200px;
+}

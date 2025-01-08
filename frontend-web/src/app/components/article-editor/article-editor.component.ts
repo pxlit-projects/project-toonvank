@@ -22,58 +22,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatButtonModule,
     MatFormFieldModule
   ],
-  template: `
-    <div class="container mx-auto p-4">
-      <form (ngSubmit)="saveArticle()" class="max-w-2xl mx-auto">
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Title</mat-label>
-          <input
-              matInput
-              type="text"
-              [(ngModel)]="article.title"
-              name="title"
-              required
-          />
-        </mat-form-field>
-
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Category</mat-label>
-          <mat-select
-              [(ngModel)]="article.category"
-              name="category"
-              required
-          >
-            <mat-option value="news">News</mat-option>
-            <mat-option value="updates">Updates</mat-option>
-            <mat-option value="announcements">Announcements</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div class="mb-4">
-          <label class="block mb-2">Content</label>
-          <quill-editor
-              name="content"
-              [(ngModel)]="article.content"
-          ></quill-editor>
-        </div>
-
-        <div class="flex gap-2">
-          @if (article.status === 'DRAFT') {
-            <button mat-raised-button color="primary" type="submit">
-              Save as Draft
-            </button>
-            <button mat-raised-button color="accent" type="button" (click)="submitForReview()">
-              Submit for Review
-            </button>
-          } @else {
-            <button mat-raised-button color="primary" type="submit">
-              Save
-            </button>
-          }
-        </div>
-      </form>
-    </div>
-  `
+  templateUrl: './article-editor.component.html',
+  styleUrls: ['./article-editor.component.css']
 })
 export class ArticleEditorComponent implements OnInit {
   private articleService = inject(ArticleService);
