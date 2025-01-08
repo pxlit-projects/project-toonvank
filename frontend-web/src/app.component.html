@@ -5,7 +5,7 @@
                 <mat-icon>article</mat-icon>
                 Articles
             </a>
-            <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
+            <ng-container *ngIf="isRedacteur()">
                 <a mat-button routerLink="/editor">
                     <mat-icon>edit</mat-icon>
                     New Article
@@ -15,7 +15,7 @@
                     My Drafts
                 </a>
             </ng-container>
-            <ng-container *ngIf="isHoofdredacteur() || isRedacteur()">
+            <ng-container *ngIf="isRedacteur()">
                 <a mat-button routerLink="/review">
                     <mat-icon>rate_review</mat-icon>
                     Review Queue

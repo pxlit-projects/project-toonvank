@@ -44,10 +44,6 @@ export class AppComponent {
         return this.authService.hasRole(UserRole.Redacteur);
     }
 
-    isHoofdredacteur() {
-        return this.authService.hasRole(UserRole.Hoofdredacteur);
-    }
-
     logout() {
         this.authService.logout();
         this.userRoleSignal.set(null);

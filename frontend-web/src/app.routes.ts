@@ -29,22 +29,22 @@ export const routes: Routes = [
     {
         path: 'articles',
         component: ArticleListComponent,
-        canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur, UserRole.Gebruiker])]
+        canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Gebruiker])]
     },
     {
         path: 'editor',
         component: ArticleEditorComponent,
-        canActivate: [() => roleGuard([UserRole.Hoofdredacteur, UserRole.Redacteur])]
+        canActivate: [() => roleGuard([UserRole.Redacteur])]
     },
     {
         path: 'review',
         component: ReviewQueueComponent,
-        canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])]
+        canActivate: [() => roleGuard([UserRole.Redacteur])]
     },
     {
         path: 'drafts',
         component: DraftsComponent,
-        canActivate: [() => roleGuard([UserRole.Redacteur, UserRole.Hoofdredacteur])]
+        canActivate: [() => roleGuard([UserRole.Redacteur])]
     },
     {
         path: 'login',
