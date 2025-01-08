@@ -31,9 +31,22 @@ export class DraftsComponent implements OnInit {
   private pendingSignal = signal<ArticleDTO[]>([]);
   private reviewsSignal = signal<ReviewDTO[]>([]);
 
-  drafts = this.draftsSignal.asReadonly();
-  rejected = this.rejectedSignal.asReadonly();
-  pending = this.pendingSignal.asReadonly();
+  // Create computed signals that filter articles by current user
+  drafts = computed(() => {
+    const currentUser = localStorage.getItem('userName');
+    return this.draftsSignal().filter(draft => draft.author === currentUser);
+  });
+
+  rejected = computed(() => {
+    const currentUser = localStorage.getItem('userName');
+    return this.rejectedSignal().filter(draft => draft.author === currentUser);
+  });
+
+  pending = computed(() => {
+    const currentUser = localStorage.getItem('userName');
+    return this.pendingSignal().filter(draft => draft.author === currentUser);
+  });
+
   reviews = this.reviewsSignal.asReadonly();
 
   constructor(
@@ -70,15 +83,17 @@ export class DraftsComponent implements OnInit {
   }
 
   submitForReview(article: ArticleDTO) {
-    this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
-      next: () => {
-        this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
-        this.loadDrafts();
-      },
-      error: (error) => {
-        this.notificationService.showNotification('Error creating review for approval:', error, 'error');
-      }
-    });
+    if (this.isAuthor(article)) {
+      this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
+        next: () => {
+          this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
+          this.loadDrafts();
+        },
+        error: (error) => {
+          this.notificationService.showNotification('Error creating review for approval:', error, 'error');
+        }
+      });
+    }
   }
 
   createReviewForArticle(article: ArticleDTO, status: ReviewStatus) {
@@ -93,9 +108,15 @@ export class DraftsComponent implements OnInit {
   }
 
   deleteDraft(id: number) {
-    if (confirm('Are you sure you want to delete this draft?')) {
+    const draft = this.draftsSignal().find(d => d.id === id);
+    if (draft && this.isAuthor(draft) && confirm('Are you sure you want to delete this draft?')) {
       this.articleService.deleteArticle(id);
       this.loadDrafts();
     }
+  }
+
+  private isAuthor(article: ArticleDTO): boolean {
+    const currentUser = localStorage.getItem('userName');
+    return currentUser === article.author;
   }
 }
