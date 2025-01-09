@@ -8,6 +8,7 @@ spring:
           '[/**]':
             allowedOrigins:
             - "http://localhost:2351"
+            - "http://localhost:4200"
             allowedMethods:
             - "*"
             allowedHeaders:
