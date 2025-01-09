@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import {switchMap, tap} from "rxjs";
 
 @Component({
   selector: 'app-article-editor',
@@ -56,23 +57,36 @@ export class ArticleEditorComponent implements OnInit {
     if (!this.article.title || !this.article.content) return;
 
     if (this.isEditing && this.article.id) {
+      // Update case
       this.articleService.updateArticle(this.article.id, {
         ...this.article,
         status: this.article.status
-      });
-      if (this.article.status === 'DRAFT') {
-        this.router.navigate(['/drafts']);
-      } else {
-        this.router.navigate(['/articles']);
-      }
+      }).pipe(
+          // Wait for the article to be saved
+          switchMap(() => this.articleService.loadArticles()),
+          // Then navigate
+          tap(() => {
+            if (this.article.status === 'DRAFT') {
+              this.router.navigate(['/drafts']);
+            } else {
+              this.router.navigate(['/articles']);
+            }
+          })
+      ).subscribe();
     } else {
+      // Create case
       this.articleService.createArticle({
         ...this.article,
         author: localStorage.getItem("userName")!,
         status: 'DRAFT'
-      }).subscribe(() => {
-        this.router.navigate(['/drafts']);
-      });
+      }).pipe(
+          // Wait for the article to be created
+          switchMap(() => this.articleService.loadArticles()),
+          // Then navigate
+          tap(() => {
+            this.router.navigate(['/drafts']);
+          })
+      ).subscribe();
     }
   }
 

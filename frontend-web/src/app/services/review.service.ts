@@ -1,10 +1,10 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
-import { Observable, map, catchError, throwError, tap } from 'rxjs';
+import {Observable, map, catchError, throwError, tap, switchMap} from 'rxjs';
 import { Review, ReviewDTO, ReviewStatus } from '../models/review.model';
 import { HttpClient } from '@angular/common/http';
 import { ArticleService } from './article.service';
 import { Article } from '../models/article.model';
-
+import {toObservable} from "@angular/core/rxjs-interop";
 @Injectable({
   providedIn: 'root',
 })
@@ -16,42 +16,37 @@ export class ReviewService {
   private reviews = signal<ReviewDTO[]>([]);
 
   constructor() {
-    this.loadReviews();
+    this.loadReviews().subscribe();
   }
 
-  private loadReviews(): void {
-    this.http.get<ReviewDTO[]>(this.endpoint).pipe(
-        tap((data) => this.reviews.set(data)),
-        catchError(this.handleError<ReviewDTO[]>('loadReviews', []))
-    ).subscribe();
-  }
-
-  public getReviewById(id: number): Observable<ReviewDTO> {
-    return this.http.get<ReviewDTO>(`${this.endpoint}/${id}`).pipe(
-        map((data) => {
-          if (!data) {
-            throw new Error(`No review found with id ${id}`);
-          }
-          return data;
+  public loadReviews(): Observable<ReviewDTO[]> {
+    return this.http.get<ReviewDTO[]>(this.endpoint).pipe(
+        tap((data) => {
+          console.log('Reviews loaded:', data);
+          this.reviews.set(data);
         }),
-        catchError(this.handleError<ReviewDTO>('getReviewById'))
+        catchError(this.handleError<ReviewDTO[]>('loadReviews', []))
     );
   }
 
   getReviews(): ReviewDTO[] {
+    this.loadReviews().subscribe();
     return this.reviews();
   }
 
   getPendingReviews(): ReviewDTO[] {
-    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.PENDING))();
+    this.loadReviews().subscribe();
+    return this.reviews().filter((review) => review.status === ReviewStatus.PENDING);
   }
 
   getApprovedReviews(): ReviewDTO[] {
-    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.PUBLISHED))();
+    this.loadReviews().subscribe();
+    return this.reviews().filter((review) => review.status === ReviewStatus.PUBLISHED);
   }
 
   getRejectedReviews(): ReviewDTO[] {
-    return computed(() => this.reviews().filter((review) => review.status === ReviewStatus.REJECTED))();
+    this.loadReviews().subscribe();
+    return this.reviews().filter((review) => review.status === ReviewStatus.REJECTED);
   }
 
   createReview(review: Partial<Review>): Observable<Review> {
@@ -63,40 +58,50 @@ export class ReviewService {
     };
 
     return this.http.post<Review>(this.endpoint, newReview).pipe(
-        tap(() => this.loadReviews()),
+        // Wait for create to complete
+        switchMap(createdReview =>
+            // Then load fresh review data
+            this.loadReviews().pipe(
+                // Then load fresh article data
+                switchMap(() => this.articleService.loadArticles()),
+                // Return the created review
+                map(() => createdReview)
+            )
+        ),
         catchError(this.handleError<Review>('createReview'))
     );
   }
 
-  updateReview(id: number, updatedReview: Partial<ReviewDTO>): void {
-    this.http.put<Review>(`${this.endpoint}/${id}`, updatedReview).pipe(
-        tap(() => this.loadReviews()),
+  updateReview(id: number, updatedReview: Partial<ReviewDTO>): Observable<Review> {
+    return this.http.put<Review>(`${this.endpoint}/${id}`, updatedReview).pipe(
+        switchMap(review =>
+            this.loadReviews().pipe(
+                switchMap(() => this.articleService.loadArticles()),
+                map(() => review)
+            )
+        ),
         catchError(this.handleError<Review>('updateReview'))
-    ).subscribe();
+    );
   }
 
-  deleteReview(id: number): void {
-    this.http.delete<Review>(`${this.endpoint}/${id}`).pipe(
-        tap(() => this.loadReviews()),
-        catchError(this.handleError<Review>('deleteReview'))
-    ).subscribe();
+  deleteReview(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`).pipe(
+        switchMap(() => this.loadReviews()),
+        map(() => undefined),  // explicitly return undefined
+        catchError(this.handleError<void>('deleteReview'))
+    );
   }
 
-  private updateReviewStatus(id: number, status: ReviewStatus): void {
-    this.http.put<Review>(`${this.endpoint}/${id}/updateStatus`, { status }).pipe(
-        tap(() => this.loadReviews()),
+  updateReviewStatus(id: number, status: ReviewStatus): Observable<Review> {
+    return this.http.put<Review>(`${this.endpoint}/${id}/updateStatus`, { status }).pipe(
+        switchMap(review =>
+            this.loadReviews().pipe(
+                switchMap(() => this.articleService.loadArticles()),
+                map(() => review)
+            )
+        ),
         catchError(this.handleError<Review>('updateReviewStatus'))
-    ).subscribe();
-  }
-
-  private updateArticleStatus(id: number, status: string): void {
-    this.http.put<Article>(`${this.endpoint}/${id}/updateStatus`, status).pipe(
-        tap(() => {
-          this.articleService.loadArticles();
-          // TODO UPDATE ARTICLE STATUS FROM INSIDE THE MICROSERVICE
-        }),
-        catchError(this.handleError<Article>('updateArticleStatus'))
-    ).subscribe();
+    );
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

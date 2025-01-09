@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import {NavigationEnd, Router, RouterModule} from '@angular/router';
 import { ArticleService } from '../../services/article.service';
 import { ReviewService } from '../../services/review.service';
 import { NotificationService } from '../../services/notification.service';
@@ -12,6 +12,8 @@ import { ArticleDTO } from '../../models/article.model';
 import { ReviewDTO } from '../../models/review.model';
 import { ReviewStatus } from '../../models/review.model';
 import Swal from "sweetalert2";
+import { filter } from 'rxjs/operators';
+import {switchMap, tap} from "rxjs";
 
 @Component({
   selector: 'app-drafts',
@@ -53,14 +55,31 @@ export class DraftsComponent implements OnInit {
   constructor(
       private articleService: ArticleService,
       private reviewService: ReviewService,
-      private notificationService: NotificationService
-  ) {}
+      private notificationService: NotificationService,
+      private router: Router
+  ) {
+    this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      // Reload data when navigating to this component
+      this.loadDrafts();
+      this.loadRejectedArticles();
+      this.loadPendingArticles();
+      this.loadReviews();
+    });
+  }
 
   ngOnInit() {
-    this.loadDrafts();
-    this.loadRejectedArticles();
-    this.loadPendingArticles();
-    this.loadReviews();
+    // Subscribe to load initial data
+    this.reviewService.loadReviews().subscribe({
+      next: () => {
+        this.loadReviews();
+        this.loadDrafts();
+        this.loadRejectedArticles();
+        this.loadPendingArticles();
+      },
+      error: (error) => console.error('Error loading initial data:', error)
+    });
   }
 
   loadDrafts() {
@@ -85,11 +104,18 @@ export class DraftsComponent implements OnInit {
 
   submitForReview(article: ArticleDTO) {
     if (this.isAuthor(article)) {
-      this.createReviewForArticle(article, ReviewStatus.PENDING).subscribe({
-        next: () => {
-          this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
-          this.loadDrafts();
-        },
+      this.createReviewForArticle(article, ReviewStatus.PENDING).pipe(
+          // Wait for review to be created
+          switchMap(() => this.articleService.loadArticles()),
+          // Then reload reviews too
+          switchMap(() => this.reviewService.loadReviews()),
+          // Then update the UI
+          tap(() => {
+            this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
+            this.loadDrafts();
+            this.loadPendingArticles();
+          })
+      ).subscribe({
         error: (error) => {
           this.notificationService.showNotification('Error creating review for approval:', error, 'error');
         }
