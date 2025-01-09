@@ -37,12 +37,23 @@ export class ArticleCardComponent {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                this.articleService.deleteArticle(this.article.id);
-                Swal.fire(
-                    'Deleted!',
-                    'Your article has been deleted.',
-                    'success'
-                );
+                // Subscribe to the delete Observable
+                this.articleService.deleteArticle(this.article.id).subscribe({
+                    next: () => {
+                        Swal.fire(
+                            'Deleted!',
+                            'Your article has been deleted.',
+                            'success'
+                        );
+                    },
+                    error: (error) => {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete the article.',
+                            'error'
+                        );
+                    }
+                });
             }
         });
     }

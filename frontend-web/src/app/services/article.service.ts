@@ -103,10 +103,14 @@ export class ArticleService {
   }
 
   deleteArticle(id: number): Observable<void> {
-    return this.http.delete<Article>(`${this.endpoint}/${id}`).pipe(
-        // Wait for delete to complete, then load fresh data
+    return this.http.delete<void>(`${this.endpoint}/${id}`).pipe(
         switchMap(() => this.loadArticles()),
-        map(() => void 0),
+        tap(() => {
+          // Update the signal directly after successful deletion
+          const currentArticles = this.articles();
+          this.articles.set(currentArticles.filter(article => article.id !== id));
+        }),
+        map(() => undefined),
         catchError(this.handleError<void>('deleteArticle'))
     );
   }

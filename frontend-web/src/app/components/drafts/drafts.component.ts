@@ -151,23 +151,26 @@ export class DraftsComponent implements OnInit {
         cancelButtonColor: '#3085d6'
       }).then((result) => {
         if (result.isConfirmed) {
-          try {
-            this.articleService.deleteArticle(id);
-            this.loadDrafts();
-            this.loadPendingArticles();
-            this.loadRejectedArticles();
-            Swal.fire(
-                'Deleted!',
-                'Your article has been deleted.',
-                'success'
-            );
-          } catch (error) {
-            Swal.fire(
-                'Error!',
-                'Failed to delete the article.',
-                'error'
-            );
-          }
+          this.articleService.deleteArticle(id).subscribe({
+            next: () => {
+              this.loadDrafts();
+              this.loadPendingArticles();
+              this.loadRejectedArticles();
+              Swal.fire(
+                  'Deleted!',
+                  'Your article has been deleted.',
+                  'success'
+              );
+            },
+            error: (error) => {
+              console.error('Delete error:', error);
+              Swal.fire(
+                  'Error!',
+                  'Failed to delete the article.',
+                  'error'
+              );
+            }
+          });
         }
       });
     }
