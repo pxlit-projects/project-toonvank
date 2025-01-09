@@ -35,7 +35,6 @@ describe('ReviewService', () => {
     ];
 
     beforeEach(() => {
-        // Create a spy object for ArticleService
         const articleSpy = jasmine.createSpyObj('ArticleService', ['loadArticles']);
         articleSpy.loadArticles.and.returnValue(of([]));
 
@@ -56,7 +55,6 @@ describe('ReviewService', () => {
         try {
             httpMock.verify();
         } catch (error) {
-            // Swallow the error to prevent test failures due to lingering requests
             console.warn('HttpTestingController verification error:', error);
         }
     });
@@ -68,7 +66,7 @@ describe('ReviewService', () => {
 
     it('should create the service and load initial reviews', fakeAsync(() => {
         flushInitialRequest();
-        tick(); // Ensure async operations complete
+        tick();
         expect(service).toBeTruthy();
     }));
 
@@ -82,7 +80,7 @@ describe('ReviewService', () => {
 
             const req = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             req.flush(mockReviews);
-            tick(); // Ensure async operations complete
+            tick();
         }));
     });
 
@@ -125,18 +123,15 @@ describe('ReviewService', () => {
                 expect(createdReview).toBeTruthy();
             });
 
-            // POST request
             const postReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             postReq.flush({ ...newReview, id: 4, reviewedAt: new Date().toISOString() });
 
-            // loadReviews request
             const loadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             loadReq.flush(mockReviews);
 
-            // loadArticles request
             expect(articleServiceSpy.loadArticles).toHaveBeenCalled();
 
-            tick(); // Ensure async operations complete
+            tick();
         }));
     });
 
@@ -153,18 +148,15 @@ describe('ReviewService', () => {
                 expect(updatedReview).toBeTruthy();
             });
 
-            // PUT request
             const putReq = httpMock.expectOne(`http://localhost:8086/review/api/reviews/${reviewId}`);
             putReq.flush({ ...mockReviews[0], ...updatedReviewData });
 
-            // loadReviews request
             const loadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             loadReq.flush(mockReviews);
 
-            // loadArticles request
             expect(articleServiceSpy.loadArticles).toHaveBeenCalled();
 
-            tick(); // Ensure async operations complete
+            tick();
         }));
     });
 
@@ -178,15 +170,13 @@ describe('ReviewService', () => {
                 expect(result).toBeUndefined();
             });
 
-            // DELETE request
             const deleteReq = httpMock.expectOne(`http://localhost:8086/review/api/reviews/${reviewId}`);
             deleteReq.flush(null);
 
-            // loadReviews request
             const loadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             loadReq.flush(mockReviews);
 
-            tick(); // Ensure async operations complete
+            tick();
         }));
     });
 
@@ -201,18 +191,15 @@ describe('ReviewService', () => {
                 expect(updatedReview).toBeTruthy();
             });
 
-            // PUT request to update status
             const putReq = httpMock.expectOne(`http://localhost:8086/review/api/reviews/${reviewId}/updateStatus`);
             putReq.flush({ ...mockReviews[0], status: newStatus });
 
-            // loadReviews request
             const loadReq = httpMock.expectOne('http://localhost:8086/review/api/reviews');
             loadReq.flush(mockReviews);
 
-            // loadArticles request
             expect(articleServiceSpy.loadArticles).toHaveBeenCalled();
 
-            tick(); // Ensure async operations complete
+            tick();
         }));
     });
 });

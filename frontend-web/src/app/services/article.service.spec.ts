@@ -40,7 +40,6 @@ describe('ArticleService', () => {
         service = TestBed.inject(ArticleService);
         httpMock = TestBed.inject(HttpTestingController);
 
-        // Handle initial constructor call
         const initialReq = httpMock.expectOne(endpoint);
         initialReq.flush(mockArticles);
     });
@@ -175,7 +174,6 @@ describe('ArticleService', () => {
                 }
             });
 
-            // POST request
             const createReq = httpMock.expectOne(endpoint);
             expect(createReq.request.method).toBe('POST');
             const createdArticleResponse = {
@@ -188,7 +186,6 @@ describe('ArticleService', () => {
             };
             createReq.flush(createdArticleResponse);
 
-            // Reload articles request
             const reloadReq = httpMock.expectOne(endpoint);
             reloadReq.flush([...mockArticles, createdArticleResponse]);
 
