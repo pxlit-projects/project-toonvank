@@ -37,7 +37,7 @@ export class ArticleCardComponent {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Subscribe to the delete Observable
+
                 this.articleService.deleteArticle(this.article.id).subscribe({
                     next: () => {
                         Swal.fire(

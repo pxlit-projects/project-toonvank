@@ -57,13 +57,13 @@ export class ArticleService {
   }
 
   getDraftArticles(): ArticleDTO[] {
-    // Trigger refresh when getting drafts
+
     this.loadArticles().subscribe();
     return this.articles().filter(article => article.status === 'DRAFT');
   }
 
   getRejectedArticles(): ArticleDTO[] {
-    // Trigger refresh when getting rejected articles
+
     this.loadArticles().subscribe();
     return this.articles().filter(article => article.status === 'REJECTED');
   }
@@ -91,10 +91,10 @@ export class ArticleService {
 
   updateArticle(id: number, article: Partial<Article>): Observable<Article> {
     return this.http.put<Article>(`${this.endpoint}/${id}`, article).pipe(
-        // Wait for update to complete, then load fresh data
+
         switchMap(updatedArticle =>
             this.loadArticles().pipe(
-                // Return the updated article
+
                 map(() => updatedArticle)
             )
         ),
@@ -106,7 +106,7 @@ export class ArticleService {
     return this.http.delete<void>(`${this.endpoint}/${id}`).pipe(
         switchMap(() => this.loadArticles()),
         tap(() => {
-          // Update the signal directly after successful deletion
+
           const currentArticles = this.articles();
           this.articles.set(currentArticles.filter(article => article.id !== id));
         }),

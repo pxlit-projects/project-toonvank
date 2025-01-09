@@ -34,7 +34,6 @@ export class DraftsComponent implements OnInit {
   private pendingSignal = signal<ArticleDTO[]>([]);
   private reviewsSignal = signal<ReviewDTO[]>([]);
 
-  // Create computed signals that filter articles by current user
   drafts = computed(() => {
     const currentUser = localStorage.getItem('userName');
     return this.draftsSignal().filter(draft => draft.author === currentUser);
@@ -61,7 +60,7 @@ export class DraftsComponent implements OnInit {
     this.router.events.pipe(
         filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      // Reload data when navigating to this component
+
       this.loadDrafts();
       this.loadRejectedArticles();
       this.loadPendingArticles();
@@ -70,7 +69,7 @@ export class DraftsComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Subscribe to load initial data
+
     this.reviewService.loadReviews().subscribe({
       next: () => {
         this.loadReviews();
@@ -105,11 +104,11 @@ export class DraftsComponent implements OnInit {
   submitForReview(article: ArticleDTO) {
     if (this.isAuthor(article)) {
       this.createReviewForArticle(article, ReviewStatus.PENDING).pipe(
-          // Wait for review to be created
+
           switchMap(() => this.articleService.loadArticles()),
-          // Then reload reviews too
+
           switchMap(() => this.reviewService.loadReviews()),
-          // Then update the UI
+
           tap(() => {
             this.notificationService.showNotification('Success', 'Review created successfully for approval', 'success');
             this.loadDrafts();

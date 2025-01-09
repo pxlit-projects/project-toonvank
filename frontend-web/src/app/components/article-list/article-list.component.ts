@@ -74,13 +74,11 @@ export class ArticleListComponent {
             const articleDate = new Date(article.updatedAt);
             articleDate.setHours(0, 0, 0, 0);
 
-            // Get filter dates
             const startDate = this.startDate();
             const endDate = this.endDate();
 
             const adjustedEndDate = endDate ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000) : null;
 
-            // Debug logging
             console.log('Article date:', articleDate);
             console.log('Start date:', startDate);
             console.log('End date:', endDate);
@@ -106,7 +104,6 @@ export class ArticleListComponent {
         });
     }
 
-    // Set dates with proper handling
     setStartDate(date: Date | null) {
         if (date) {
             const normalized = new Date(date);

@@ -58,13 +58,11 @@ export class ReviewService {
     };
 
     return this.http.post<Review>(this.endpoint, newReview).pipe(
-        // Wait for create to complete
+
         switchMap(createdReview =>
-            // Then load fresh review data
+
             this.loadReviews().pipe(
-                // Then load fresh article data
                 switchMap(() => this.articleService.loadArticles()),
-                // Return the created review
                 map(() => createdReview)
             )
         ),

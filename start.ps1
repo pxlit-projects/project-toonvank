@@ -1,33 +1,32 @@
-# Save the current location
-$originalLocation = Get-Location
+$frontendPath = ".\frontend-web"
+$backendPath = ".\backend-java\NewsManagementSystem"
 
-try {
-    # Navigate to the backend directory and run Maven
-    Set-Location -Path ".\backend-java\NewsManagementSystem"
-    Write-Host "Building backend project..." -ForegroundColor Green
-    mvn clean package -DskipTests
+Write-Host "Starting deployment process..." -ForegroundColor Green
 
-    # Check if Maven command was successful
-    if ($LASTEXITCODE -ne 0) {
-        throw "Maven build failed with exit code $LASTEXITCODE"
-    }
-
-    # Return to original directory
-    Set-Location $originalLocation
-
-    # Run docker-compose
-    Write-Host "Starting Docker containers..." -ForegroundColor Green
+Write-Host "`nDeploying frontend..." -ForegroundColor Yellow
+if (Test-Path -Path $frontendPath) {
+    Set-Location -Path $frontendPath
+    Write-Host "Stopping and removing frontend containers..."
     docker compose down -v
-    docker-compose up -d
-
-    if ($LASTEXITCODE -ne 0) {
-        throw "Docker Compose failed with exit code $LASTEXITCODE"
-    }
-
-    Write-Host "Setup completed successfully!" -ForegroundColor Green
-} catch {
-    Write-Host "An error occurred: $_" -ForegroundColor Red
-} finally {
-    # Ensure we always return to the original directory
-    Set-Location $originalLocation
+    Write-Host "Building and starting frontend containers..."
+    docker compose up -d --build
+    Set-Location ..
+} else {
+    Write-Host "Frontend directory not found at $frontendPath" -ForegroundColor Red
 }
+
+Write-Host "`nDeploying backend..." -ForegroundColor Yellow
+if (Test-Path -Path $backendPath) {
+    Set-Location -Path $backendPath
+    Write-Host "Rebuilding backend..."
+    mvn clean package -DskipTests
+    Write-Host "Stopping and removing backend containers..."
+    docker compose down -v
+    Write-Host "Building and starting backend containers..."
+    docker compose up -d --build
+    Set-Location ..
+} else {
+    Write-Host "Backend directory not found at $backendPath" -ForegroundColor Red
+}
+
+Write-Host "`nDeployment process completed!" -ForegroundColor Green

@@ -7,55 +7,55 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:4200"
+            - "http://localhost:2351"
             allowedMethods:
-              - "*"
+            - "*"
             allowedHeaders:
-              - "*"
+            - "*"
             allowCredentials: true
       discovery:
         locator:
           enabled: true
       routes:
-        # Comment Service Route
-        - id: comment-service
-          uri: lb://comment-service
-          predicates:
-            - Path=/comment/**
-          filters:
-            - RewritePath=/comment/(?<path>.*), /$\{path}
+      # Comment Service Route
+      - id: comment-service
+        uri: lb://comment-service
+        predicates:
+        - Path=/comment/**
+        filters:
+        - RewritePath=/comment/(?<path>.*), /$\{path}
 
-        # Post Service Route
-        - id: post-service
-          uri: lb://post-service
-          predicates:
-            - Path=/post/**
-          filters:
-            - RewritePath=/post/(?<path>.*), /$\{path}
+      # Post Service Route
+      - id: post-service
+        uri: lb://post-service
+        predicates:
+        - Path=/post/**
+        filters:
+        - RewritePath=/post/(?<path>.*), /$\{path}
 
-        # Review Service Route
-        - id: review-service
-          uri: lb://review-service
-          predicates:
-            - Path=/review/**
-          filters:
-            - RewritePath=/review/(?<path>.*), /$\{path}
+      # Review Service Route
+      - id: review-service
+        uri: lb://review-service
+        predicates:
+        - Path=/review/**
+        filters:
+        - RewritePath=/review/(?<path>.*), /$\{path}
 
-        # Notification Service Route
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/notification/**
-          filters:
-            - RewritePath=/notification/(?<path>.*), /$\{path}
+      # Notification Service Route
+      - id: notification-service
+        uri: lb://notification-service
+        predicates:
+        - Path=/notification/**
+        filters:
+        - RewritePath=/notification/(?<path>.*), /$\{path}
 
-        # Gateway Service Route
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/notification/**
-          filters:
-            - RewritePath=/notification/(?<path>.*), /$\{path}
+      # Gateway Service Route
+      - id: notification-service
+        uri: lb://notification-service
+        predicates:
+        - Path=/notification/**
+        filters:
+        - RewritePath=/notification/(?<path>.*), /$\{path}
 eureka:
   client:
     serviceUrl:
