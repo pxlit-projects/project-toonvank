@@ -2,6 +2,7 @@
 ![eShopOnContainers Architecture](NewsManagementSystem.png)
 # Class Diagram
 ![class diagram](db.png)
+
 # Overzicht van de Architectuur
 
 ## 1\. Client Applicatie
@@ -24,7 +25,7 @@
 
 ### Kenmerken van de Microservices:
 
--   **Synchronous Communication**: Alle microservices hebben een synchrone communicatie onderling, wat betekent dat ze direct gegevens uitwisselen wanneer er een verzoek wordt verzonden.
+-   **Synchronous Communication**: Bepaalde microservices hebben een synchrone communicatie onderling, wat betekent dat ze direct gegevens uitwisselen wanneer er een verzoek wordt verzonden.
 -   **Asynchronous Communication via RabbitMQ**: Bepaalde taken worden asynchroon uitgevoerd via RabbitMQ, een berichtensysteem.
 
 ## 4\. Service Discovery en Configuratie
@@ -35,8 +36,8 @@
 ## 5\. Cloud Services
 
 -   **RabbitMQ Queue**: Wordt gebruikt voor asynchrone berichtenuitwisseling tussen de microservices. Dit zorgt voor losgekoppelde communicatie. Voor asynchrone communicatie, bijvoorbeeld om notificaties (zoals bij US8) te sturen zonder dat de services direct afhankelijk van elkaar zijn.Dit betekent dat als bijvoorbeeld de ReviewService een post wil goedkeuren, het informatie over die post kan ophalen van de PostService via OpenFeign. Deze REST-communicatie is nodig omdat de ReviewService en PostService als losse onderdelen in een microservices-architectuur draaien en geen directe toegang hebben tot elkaars data. OpenFeign maakt het eenvoudig om API-aanroepen tussen de services te doen zonder extra complexe code.
--   **Open-Feign**: Voor het opzetten van REST-communicatie tussen de services.
--   **SonarQube**: SonarQube is geïntegreerd om de codekwaliteit en security vulnerabilities van de backend-code te analyseren en monitoren.
+-   **Open-Feign**: Voor het opzetten van REST-communicatie tussen de services. Voor het deleten van een Review van een Post. Voor het versturen van een email via message-service.
+-   **SonarQube**: SonarQube is uitgevoerd in het project om de codekwaliteit en security vulnerabilities van de backend-code te analyseren en monitoren.
 
 # Link met User Stories
 
