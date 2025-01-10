@@ -15,9 +15,12 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.BDDAssertions.within;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -81,7 +84,15 @@ class ReviewServiceTest {
         Optional<Review> foundReview = reviewService.getReviewById(savedReview.getId());
 
         assertTrue(foundReview.isPresent());
-        assertEquals(savedReview, foundReview.get());
+        Review retrievedReview = foundReview.get();
+        assertEquals(savedReview.getId(), retrievedReview.getId());
+        assertEquals(savedReview.getPostId(), retrievedReview.getPostId());
+        assertEquals(savedReview.getStatus(), retrievedReview.getStatus());
+        assertEquals(savedReview.getComment(), retrievedReview.getComment());
+
+        // Compare timestamps with truncated precision
+        assertThat(retrievedReview.getReviewedAt())
+                .isCloseTo(savedReview.getReviewedAt(), within(1, ChronoUnit.MICROS));
     }
 
     @Test

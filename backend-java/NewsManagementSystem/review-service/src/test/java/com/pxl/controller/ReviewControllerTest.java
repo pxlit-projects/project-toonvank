@@ -1,5 +1,6 @@
-package com.pxl.services.controller;
+package com.pxl.controller;
 
+import com.pxl.services.controller.ReviewController;
 import com.pxl.services.domain.Review;
 import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.services.ReviewService;

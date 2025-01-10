@@ -42,4 +42,5 @@ Run `./start.ps1` to start both frontend and backend services automatically.
 - Add `--code-coverage` flag for coverage reporting
 
 #### Backend Tests
-- Tests can be run using SonarQube
+- Run `docker run -d --name sonarqube -p 9000:9000 sonarqube:latest`
+- Run `mvn clean verify sonar:sonar -Dsonar.projectKey=NewsManagementSystem -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqp_a4d264dec2c3bedf6fdf01d8f81b8d38e51d8334 -Dsonar.java.coveragePlugin=jacoco -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml` inside of `CMD` (not `powershell`)

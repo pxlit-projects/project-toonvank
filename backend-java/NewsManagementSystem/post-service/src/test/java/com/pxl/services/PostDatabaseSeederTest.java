@@ -4,6 +4,7 @@ import com.pxl.services.domain.Post;
 import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.PostRepository;
 import com.pxl.services.services.PostDatabaseSeeder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -33,6 +34,7 @@ class PostDatabaseSeederTest {
 
     @MockBean
     private PostRepository postRepository;
+
     @Autowired
     private PostDatabaseSeeder seeder;
 
@@ -47,14 +49,16 @@ class PostDatabaseSeederTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
     }
 
+    @BeforeEach
+    void setUp() {
+        reset(postRepository);
+    }
+
     @Test
     void seedPosts_WhenDatabaseEmpty_ShouldSavePosts() {
-
         when(postRepository.count()).thenReturn(0L);
 
-
         seeder.seedPosts();
-
 
         verify(postRepository, times(3)).save(postCaptor.capture());
         var savedPosts = postCaptor.getAllValues();

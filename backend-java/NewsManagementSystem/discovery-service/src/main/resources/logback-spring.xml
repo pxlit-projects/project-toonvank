@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property name="LOGS" value="./logs"/>
-    <property name="SERVICE_NAME" value="${spring.application.name}"/>
+    <property name="SERVICE_NAME" value="discovery-service"/>
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %d{ISO8601} %highlight(%-5level) [${SERVICE_NAME},%X{traceId},%X{spanId}] [%blue(%t)] %yellow(%C{1}):
+                %d{ISO8601} %highlight(%-5level) [discovery-service,%X{traceId},%X{spanId}] [%blue(%t)] %yellow(%C{1}):
                 %msg%n%throwable
             </Pattern>
         </layout>
     </appender>
 
     <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/${SERVICE_NAME}.log</file>
+        <file>${LOGS}/discovery-service.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{ISO8601} %-5level [${SERVICE_NAME},%X{traceId},%X{spanId}] [%t] %C{1}: %msg%n%throwable
@@ -21,7 +21,7 @@
         </encoder>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/${SERVICE_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOGS}/discovery-service-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
