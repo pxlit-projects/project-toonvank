@@ -1,12 +1,10 @@
-version: "3.3"
-
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 30s
@@ -19,12 +17,12 @@ services:
     container_name: commentservicedb
     image: mysql:latest
     ports:
-      - "3306:3306"
+      - "${COMMENT_DB_PORT:-3306}:3306"
     environment:
-      MYSQL_DATABASE: "commentservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: ${COMMENT_DB_NAME:-commentservice_db}
+      MYSQL_USER: ${MYSQL_USER:-admin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
     networks:
       - spring-cloud-network
 
@@ -32,12 +30,12 @@ services:
     container_name: postservicedb
     image: mysql:latest
     ports:
-      - "3307:3306"
+      - "${POST_DB_PORT:-3307}:3306"
     environment:
-      MYSQL_DATABASE: "postservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: ${POST_DB_NAME:-postservice_db}
+      MYSQL_USER: ${MYSQL_USER:-admin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
     networks:
       - spring-cloud-network
 
@@ -45,16 +43,16 @@ services:
     container_name: reviewservicedb
     image: mysql:latest
     ports:
-      - "3308:3306"
+      - "${REVIEW_DB_PORT:-3308}:3306"
     environment:
-      MYSQL_DATABASE: "reviewservice_db"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: ${REVIEW_DB_NAME:-reviewservice_db}
+      MYSQL_USER: ${MYSQL_USER:-admin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-admin}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
     networks:
       - spring-cloud-network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin", "-padmin" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-admin}", "-p${MYSQL_PASSWORD:-admin}" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -64,7 +62,7 @@ services:
       context: .
       dockerfile: ./config-service/Dockerfile
     ports:
-      - "8088:8088"
+      - ${CONFIG_SERVICE_PORT}:8088
     networks:
       - spring-cloud-network
     healthcheck:
@@ -79,7 +77,7 @@ services:
       context: .
       dockerfile: ./discovery-service/Dockerfile
     ports:
-      - "8061:8061"
+      - "${DISCOVERY_SERVICE_PORT:-8061}:8061"
     depends_on:
       config-service:
         condition: service_healthy
@@ -91,7 +89,7 @@ services:
       context: ./
       dockerfile: ./notification-service/Dockerfile
     ports:
-      - "8079:8079"
+      - "${NOTIFICATION_SERVICE_PORT:-8079}:8079"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -99,6 +97,10 @@ services:
         condition: service_started
     networks:
       - spring-cloud-network
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
 
   review-service:
     container_name: review-service
@@ -106,7 +108,7 @@ services:
       context: ./
       dockerfile: ./review-service/Dockerfile
     ports:
-      - "8085:8085"
+      - "${REVIEW_SERVICE_PORT:-8085}:8085"
     depends_on:
       discovery-service:
         condition: service_started
@@ -116,42 +118,60 @@ services:
         condition: service_healthy
     networks:
       - spring-cloud-network
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:mysql://reviewservicedb:3306/${REVIEW_DB_NAME:-reviewservice_db}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-admin}
 
   post-service:
     build:
       context: ./
       dockerfile: ./post-service/Dockerfile
     ports:
-      - "8084:8084"
+      - "${POST_SERVICE_PORT:-8084}:8084"
     depends_on:
       - discovery-service
       - postservicedb
       - rabbitmq
     networks:
       - spring-cloud-network
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:mysql://postservicedb:3306/${POST_DB_NAME:-postservice_db}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-admin}
 
   comment-service:
     build:
       context: ./
       dockerfile: ./comment-service/Dockerfile
     ports:
-      - "8083:8083"
+      - ${COMMENT_SERVICE_PORT:-8083}:8083
     depends_on:
       - discovery-service
       - commentservicedb
     networks:
       - spring-cloud-network
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:mysql://commentservicedb:3306/${COMMENT_DB_NAME:-commentservice_db}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-admin}
 
   gateway-service:
     build:
       context: ./
       dockerfile: ./gateway-service/Dockerfile
     ports:
-      - "8086:8086"
+      - "${GATEWAY_SERVICE_PORT:-8086}:8086"
     depends_on:
       - discovery-service
     networks:
       - spring-cloud-network
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+
 networks:
   spring-cloud-network:
     driver: bridge

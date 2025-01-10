@@ -1,6 +1,25 @@
 $frontendPath = ".\frontend-web"
 $backendPath = ".\backend-java\NewsManagementSystem"
 
+function Test-EnvFile {
+    param (
+        [string]$path,
+        [string]$component
+    )
+    
+    if (!(Test-Path -Path "$path\.env")) {
+        Write-Host "Warning: No .env file found for $component at $path\.env" -ForegroundColor Yellow
+        Write-Host "Creating default .env file..." -ForegroundColor Yellow
+        Copy-Item "$path\.env.example" "$path\.env" -ErrorAction SilentlyContinue
+    }
+}
+
+Write-Host "Starting deployment process..." -ForegroundColor Green
+
+Test-EnvFile -path $frontendPath -component "frontend"
+Test-EnvFile -path $backendPath -component "backend"
+
+
 Write-Host "Starting deployment process..." -ForegroundColor Green
 
 Write-Host "`nDeploying frontend..." -ForegroundColor Yellow

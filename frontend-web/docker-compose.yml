@@ -3,4 +3,5 @@ services:
   angular-app:
     build: .
     ports:
-      - "2351:80"
+      - "${FRONTEND_PORT}:80"
+    env_file: .env
