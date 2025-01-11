@@ -22,7 +22,6 @@ export class ReviewService {
   public loadReviews(): Observable<ReviewDTO[]> {
     return this.http.get<ReviewDTO[]>(this.endpoint).pipe(
         tap((data) => {
-          console.log('Reviews loaded:', data);
           this.reviews.set(data);
         }),
         catchError(this.handleError<ReviewDTO[]>('loadReviews', []))

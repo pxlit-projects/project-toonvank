@@ -27,12 +27,7 @@ export class CommentService {
 
     public getCommentByPostId(id: number): Observable<CommentDTO[]> {
         return this.http.get<CommentDTO[]>(`${this.endpoint}/post/${id}`).pipe(
-            map(data => {
-                if (!data || data.length === 0) {
-                    throw new Error(`No comments found for comment with id ${id}`);
-                }
-                return data;
-            }),
+            map(data => data),
             catchError(this.handleError<CommentDTO[]>('getCommentByPostId', []))
         );
     }

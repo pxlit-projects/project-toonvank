@@ -67,7 +67,7 @@ public class CommentDatabaseSeeder {
             commentRepository.save(comment5);
             commentRepository.save(comment6);
 
-            System.out.println("Database has been seeded with sample comments.");
+            log.info("Database has been seeded with sample comments.");
         }
     }
 }

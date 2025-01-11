@@ -55,7 +55,7 @@ public class PostDatabaseSeeder {
             postRepository.save(post2);
             postRepository.save(post3);
 
-            System.out.println("Database has been seeded with sample posts.");
+            log.info("Database has been seeded with sample posts.");
         }
     }
 }

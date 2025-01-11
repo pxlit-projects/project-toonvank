@@ -38,6 +38,7 @@ public class PostService {
             Post post = postMapper.toPost(postDTO);
             return postRepository.save(post);
         } catch (Exception e) {
+            log.error("Failed to create posts: {}", e.getMessage());
             throw new PostCreationException("Failed to create posts: " + e.getMessage());
         }
     }
@@ -55,6 +56,7 @@ public class PostService {
                         return postRepository.save(post);
                     });
         } catch (Exception e) {
+            log.error("Failed to update posts: {}", e.getMessage());
             throw new PostUpdateException("Failed to update posts: " + e.getMessage());
         }
     }
@@ -71,8 +73,10 @@ public class PostService {
                         return postRepository.save(post);
                     });
         } catch (IllegalArgumentException e) {
+            log.error("Invalid status: {}", newStatus);
             throw new IllegalArgumentException("Invalid status: " + newStatus);
         } catch (Exception e) {
+            log.error("Failed to update status: {}", e.getMessage());
             throw new PostPublishException("Failed to publish post: " + e.getMessage());
         }
     }
@@ -82,6 +86,7 @@ public class PostService {
         try {
             return postRepository.findAll();
         } catch (Exception e) {
+            log.error("Failed to retrieve posts: {}", e.getMessage());
             throw new PostPublishException("Failed to retrieve PUBLISHED posts: " + e.getMessage());
         }
     }
@@ -91,6 +96,7 @@ public class PostService {
         try {
             return postRepository.findByContentContainingOrCategoryOrAuthor(content, category, author);
         } catch (Exception e) {
+            log.error("Failed to search posts: {}", e.getMessage());
             throw new RuntimeException("Failed to search posts: " + e.getMessage());
         }
     }
@@ -100,6 +106,7 @@ public class PostService {
         try {
             return postRepository.findById(id);
         } catch (Exception e) {
+            log.error("Post with ID {} not found", id);
             throw new PostNotFoundException("Post with ID " + id + " not found.");
         }
     }
@@ -117,6 +124,7 @@ public class PostService {
                 throw new PostDeletionException("Failed to delete post with ID " + id + ": " + e.getMessage());
             }
         } else {
+            log.error("Post with ID {} not found", id);
             throw new PostDeletionException("Post with ID " + id + " not found.");
         }
     }
@@ -133,7 +141,7 @@ public class PostService {
                 throw new PostNotFoundException("Post with ID " + review.getPostId() + " not found.");
             }
         } catch (Exception e) {
-            System.out.println("Failed to process review message: " + e.getMessage());
+            log.error("Failed to process review message: " + e.getMessage());
         }
     }
 }

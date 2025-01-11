@@ -79,16 +79,9 @@ export class ArticleListComponent {
 
             const adjustedEndDate = endDate ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000) : null;
 
-            console.log('Article date:', articleDate);
-            console.log('Start date:', startDate);
-            console.log('End date:', endDate);
-            console.log('Adjusted end date:', adjustedEndDate);
-
             const matchesDate =
                 (!startDate || articleDate.getTime() >= startDate.getTime()) &&
                 (!endDate || articleDate.getTime() < adjustedEndDate!.getTime());
-
-            console.log('Matches date:', matchesDate);
 
             const matchesAuthor =
                 !this.selectedAuthor() || article.author === this.selectedAuthor();

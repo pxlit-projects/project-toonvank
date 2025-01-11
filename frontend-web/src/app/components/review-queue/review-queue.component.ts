@@ -41,7 +41,6 @@ export class ReviewQueueComponent implements OnInit {
   loadPendingArticles() {
     const articles = this.articleService.getPendingArticles();
     this.pendingArticlesSignal.set(articles);
-    console.log('Pending articles:', articles);
   }
 
   onCommentAdded(comment: string) {

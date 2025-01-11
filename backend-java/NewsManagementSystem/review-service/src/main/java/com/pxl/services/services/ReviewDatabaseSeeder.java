@@ -4,6 +4,8 @@ import com.pxl.services.domain.Review;
 import com.pxl.services.domain.ReviewStatus;
 import com.pxl.services.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -13,12 +15,13 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ReviewDatabaseSeeder implements CommandLineRunner {
-
+    private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
     private final ReviewRepository reviewRepository;
 
     @Override
     public void run(String... args) throws Exception {
         seedReviews();
+        log.info("Database seeding has been completed.");
     }
 
     private void seedReviews() {
@@ -46,9 +49,9 @@ public class ReviewDatabaseSeeder implements CommandLineRunner {
 
             reviewRepository.saveAll(List.of(review1, review2, review3));
 
-            System.out.println("Sample reviews have been added to the database.");
+            log.info("Sample reviews have been added to the database.");
         } else {
-            System.out.println("Reviews already exist in the database.");
+            log.info("Reviews already exist in the database.");
         }
     }
 }
